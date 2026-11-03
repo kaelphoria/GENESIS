@@ -42,7 +42,7 @@ jobs:
           node-version: 22
 
       - name: Install locked dependencies
-        run: npm ci
+        run: npm ci --include=dev
 
       - name: Validate Prisma schema
         run: npx prisma validate
