@@ -4,7 +4,7 @@ RUN apk add --no-cache openssl libc6-compat
 
 FROM base AS deps
 COPY package.json ./
-RUN npm install
+RUN npm ci
 
 FROM base AS builder
 ENV NEXT_TELEMETRY_DISABLED=1
