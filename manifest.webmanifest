@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "GENESIS 3.1 — Universe",
+  "short_name": "GENESIS",
+  "description": "Private local-first personal intelligence ecosystem",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#080a0e",
+  "theme_color": "#080a0e",
+  "icons": [
+    { "src": "icons/genesis.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "icons/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ]
+}
