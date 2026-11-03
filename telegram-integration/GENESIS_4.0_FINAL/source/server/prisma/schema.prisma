@@ -1,5 +1,12 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
 model User {
   id String @id @default(cuid())
@@ -29,6 +36,7 @@ model User {
   lifeEventVersions LifeEventVersion[]
   importPreviewReceipts ImportPreviewReceipt[]
 }
+
 model PersonalProfile {
   id String @id @default(cuid())
   userId String @unique
@@ -42,6 +50,7 @@ model PersonalProfile {
   user User @relation(fields:[userId], references:[id], onDelete:Cascade)
   versions ProfileVersion[]
 }
+
 model ProfileVersion {
   id String @id @default(cuid())
   profileId String
@@ -51,6 +60,7 @@ model ProfileVersion {
   profile PersonalProfile @relation(fields:[profileId], references:[id], onDelete:Cascade)
   @@unique([profileId, version])
 }
+
 model World {
   id String @id @default(cuid())
   userId String
@@ -67,6 +77,7 @@ model World {
   @@unique([userId, slug])
   @@index([userId])
 }
+
 model Action {
   id String @id @default(cuid())
   userId String
@@ -88,6 +99,7 @@ model Action {
   @@index([userId, completedAt])
   @@index([userId, projectId])
 }
+
 model MemoryRecord {
   id String @id @default(cuid())
   userId String
@@ -119,6 +131,7 @@ model MemoryRecord {
   @@index([userId, contextPermission, status])
   @@index([userId, sourceRefId])
 }
+
 model MemoryEmbedding {
   id String @id @default(cuid())
   userId String
@@ -129,6 +142,7 @@ model MemoryEmbedding {
   memory MemoryRecord @relation(fields:[memoryId], references:[id], onDelete:Cascade)
   @@index([userId])
 }
+
 model Conversation {
   id String @id @default(cuid())
   userId String
@@ -140,6 +154,7 @@ model Conversation {
   chatRequests ChatRequest[]
   @@index([userId, updatedAt])
 }
+
 model ChatMessage {
   id String @id @default(cuid())
   userId String
@@ -309,7 +324,6 @@ model Source {
   memories MemoryRecord[]
   artifacts Artifact[]
   provenanceEvents ProvenanceEvent[]
-  lifeEvents LifeEvent[]
   @@index([userId, kind, createdAt])
   @@index([userId, contentHash])
 }
@@ -363,7 +377,6 @@ model RateLimitBucket {
   @@index([updatedAt])
 }
 
-
 model LifeEvent {
   id String @id @default(cuid())
   userId String
@@ -391,7 +404,6 @@ model LifeEvent {
   @@index([userId, goalId])
 }
 
-
 model LifeEventVersion {
   id String @id @default(cuid())
   userId String
@@ -404,7 +416,6 @@ model LifeEventVersion {
   @@unique([eventId, version])
   @@index([userId, createdAt])
 }
-
 
 model ImportPreviewReceipt {
   id String @id @default(cuid())
