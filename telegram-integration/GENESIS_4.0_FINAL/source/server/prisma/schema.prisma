@@ -1,0 +1,421 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  passwordHash String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  profile PersonalProfile?
+  worlds World[]
+  goals Goal[]
+  actions Action[]
+  memories MemoryRecord[]
+  messages ChatMessage[]
+  conversations Conversation[]
+  embeddings MemoryEmbedding[]
+  auditEvents AuditEvent[]
+  chatRequests ChatRequest[]
+  projects Project[]
+  milestones Milestone[]
+  decisions Decision[]
+  experiments Experiment[]
+  artifacts Artifact[]
+  sources Source[]
+  memoryVersions MemoryVersion[]
+  provenanceEvents ProvenanceEvent[]
+  lifeEvents LifeEvent[]
+  lifeEventVersions LifeEventVersion[]
+  importPreviewReceipts ImportPreviewReceipt[]
+}
+model PersonalProfile {
+  id String @id @default(cuid())
+  userId String @unique
+  displayName String @default("")
+  values String @default("") @db.Text
+  direction String @default("") @db.Text
+  currentFocus String @default("") @db.Text
+  supportStyle String @default("") @db.Text
+  version Int @default(1)
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  versions ProfileVersion[]
+}
+model ProfileVersion {
+  id String @id @default(cuid())
+  profileId String
+  version Int
+  snapshot Json
+  createdAt DateTime @default(now())
+  profile PersonalProfile @relation(fields:[profileId], references:[id], onDelete:Cascade)
+  @@unique([profileId, version])
+}
+model World {
+  id String @id @default(cuid())
+  userId String
+  slug String
+  title String
+  description String @db.Text
+  intention String @default("") @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  actions Action[]
+  goals Goal[]
+  memories MemoryRecord[]
+  @@unique([userId, slug])
+  @@index([userId])
+}
+model Action {
+  id String @id @default(cuid())
+  userId String
+  worldId String?
+  projectId String?
+  goalId String?
+  title String
+  notes String @default("") @db.Text
+  priority String @default("normal")
+  dueAt DateTime?
+  completedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  world World? @relation(fields:[worldId], references:[id], onDelete:SetNull)
+  project Project? @relation(fields:[projectId], references:[id], onDelete:SetNull)
+  goal Goal? @relation(fields:[goalId], references:[id], onDelete:SetNull)
+  @@index([userId, goalId])
+  @@index([userId, completedAt])
+  @@index([userId, projectId])
+}
+model MemoryRecord {
+  id String @id @default(cuid())
+  userId String
+  worldId String?
+  title String
+  content String @db.Text
+  classification String @default("USER_STATEMENT")
+  source String @default("USER_ENTERED")
+  sourceRefId String?
+  version Int @default(1)
+  confidence Float?
+  status String @default("active")
+  contextPermission String @default("denied")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  world World? @relation(fields:[worldId], references:[id], onDelete:SetNull)
+  embedding MemoryEmbedding?
+  sourceRef Source? @relation(fields:[sourceRefId], references:[id], onDelete:SetNull)
+  versions MemoryVersion[]
+  provenanceEvents ProvenanceEvent[]
+  embeddingStatus String @default("pending")
+  embeddingModel String?
+  embeddedAt DateTime?
+  contentHash String?
+  lastEmbeddingErrorCode String?
+  @@index([userId, status, createdAt])
+  @@index([userId, embeddingStatus])
+  @@index([userId, contextPermission, status])
+  @@index([userId, sourceRefId])
+}
+model MemoryEmbedding {
+  id String @id @default(cuid())
+  userId String
+  memoryId String @unique
+  embedding Unsupported("vector(1536)")
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  memory MemoryRecord @relation(fields:[memoryId], references:[id], onDelete:Cascade)
+  @@index([userId])
+}
+model Conversation {
+  id String @id @default(cuid())
+  userId String
+  title String @default("Новый диалог")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  messages ChatMessage[]
+  chatRequests ChatRequest[]
+  @@index([userId, updatedAt])
+}
+model ChatMessage {
+  id String @id @default(cuid())
+  userId String
+  conversationId String
+  role String
+  content String @db.Text
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  conversation Conversation @relation(fields:[conversationId], references:[id], onDelete:Cascade)
+  @@index([userId, createdAt])
+  @@index([conversationId, createdAt])
+}
+
+model ChatRequest {
+  id String @id @default(cuid())
+  userId String
+  conversationId String
+  idempotencyKey String
+  promptHash String
+  userMessageId String?
+  status String @default("pending")
+  response String? @db.Text
+  contextManifest Json?
+  agentTrace Json?
+  errorCode String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  @@unique([userId, idempotencyKey])
+  @@index([userId, status, updatedAt])
+}
+
+model Goal {
+  id String @id @default(cuid())
+  userId String
+  worldId String?
+  title String
+  description String @default("") @db.Text
+  status String @default("active")
+  priority String @default("normal")
+  targetAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  world World? @relation(fields: [worldId], references: [id], onDelete: SetNull)
+  projects Project[]
+  actions Action[]
+  decisions Decision[]
+  lifeEvents LifeEvent[]
+  @@index([userId, status, updatedAt])
+  @@index([userId, worldId])
+}
+
+model Project {
+  id String @id @default(cuid())
+  userId String
+  goalId String?
+  title String
+  description String @default("") @db.Text
+  status String @default("active")
+  priority String @default("normal")
+  startAt DateTime?
+  targetAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  goal Goal? @relation(fields:[goalId], references:[id], onDelete:SetNull)
+  milestones Milestone[]
+  actions Action[]
+  decisions Decision[]
+  artifacts Artifact[]
+  lifeEvents LifeEvent[]
+  @@index([userId, status, updatedAt])
+  @@index([userId, goalId])
+}
+
+model Milestone {
+  id String @id @default(cuid())
+  userId String
+  projectId String
+  title String
+  description String @default("") @db.Text
+  status String @default("pending")
+  dueAt DateTime?
+  sortOrder Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  project Project @relation(fields:[projectId], references:[id], onDelete:Cascade)
+  @@index([userId, projectId, sortOrder])
+}
+
+model Decision {
+  id String @id @default(cuid())
+  userId String
+  projectId String?
+  goalId String?
+  question String @db.Text
+  options Json?
+  selectedOption String? @db.Text
+  rationale String @default("") @db.Text
+  status String @default("open")
+  assumptions Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  project Project? @relation(fields:[projectId], references:[id], onDelete:SetNull)
+  goal Goal? @relation(fields:[goalId], references:[id], onDelete:SetNull)
+  experiments Experiment[]
+  lifeEvents LifeEvent[]
+  @@index([userId, status, updatedAt])
+  @@index([userId, goalId])
+}
+
+model Experiment {
+  id String @id @default(cuid())
+  userId String
+  decisionId String?
+  title String
+  hypothesis String @default("") @db.Text
+  method String @default("") @db.Text
+  result String @default("") @db.Text
+  status String @default("planned")
+  startedAt DateTime?
+  completedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  decision Decision? @relation(fields:[decisionId], references:[id], onDelete:SetNull)
+  @@index([userId, status, updatedAt])
+}
+
+model Artifact {
+  id String @id @default(cuid())
+  userId String
+  projectId String?
+  sourceId String?
+  title String
+  mediaType String
+  storageUri String?
+  contentHash String?
+  status String @default("active")
+  version Int @default(1)
+  metadata Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  project Project? @relation(fields:[projectId], references:[id], onDelete:SetNull)
+  source Source? @relation(fields:[sourceId], references:[id], onDelete:SetNull)
+  provenanceEvents ProvenanceEvent[]
+  @@index([userId, projectId, updatedAt])
+  @@index([userId, sourceId, status])
+}
+
+model Source {
+  id String @id @default(cuid())
+  userId String
+  kind String
+  title String
+  uri String?
+  contentHash String?
+  trustStatus String @default("unverified")
+  metadata Json?
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  memories MemoryRecord[]
+  artifacts Artifact[]
+  provenanceEvents ProvenanceEvent[]
+  lifeEvents LifeEvent[]
+  @@index([userId, kind, createdAt])
+  @@index([userId, contentHash])
+}
+
+model MemoryVersion {
+  id String @id @default(cuid())
+  userId String
+  memoryId String
+  version Int
+  snapshot Json
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  memory MemoryRecord @relation(fields:[memoryId], references:[id], onDelete:Cascade)
+  @@unique([memoryId, version])
+  @@index([userId, createdAt])
+}
+
+model ProvenanceEvent {
+  id String @id @default(cuid())
+  userId String
+  sourceId String?
+  memoryId String?
+  artifactId String?
+  eventType String
+  details Json?
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  source Source? @relation(fields:[sourceId], references:[id], onDelete:SetNull)
+  memory MemoryRecord? @relation(fields:[memoryId], references:[id], onDelete:SetNull)
+  artifact Artifact? @relation(fields:[artifactId], references:[id], onDelete:SetNull)
+  @@index([userId, createdAt])
+  @@index([sourceId, createdAt])
+  @@index([memoryId, createdAt])
+}
+
+model AuditEvent {
+  id String @id @default(cuid())
+  userId String
+  event String
+  metadata Json?
+  createdAt DateTime @default(now())
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+  @@index([userId, createdAt])
+}
+
+model RateLimitBucket {
+  keyHash String @id
+  count Int @default(0)
+  windowStartedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([updatedAt])
+}
+
+
+model LifeEvent {
+  id String @id @default(cuid())
+  userId String
+  projectId String?
+  goalId String?
+  decisionId String?
+  sourceId String?
+  title String
+  description String @default("") @db.Text
+  category String @default("milestone")
+  occurredAt DateTime
+  significance Int @default(3)
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  goal Goal? @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  decision Decision? @relation(fields: [decisionId], references: [id], onDelete: SetNull)
+  source Source? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  versions LifeEventVersion[]
+  @@index([userId, occurredAt])
+  @@index([userId, category, occurredAt])
+  @@index([userId, projectId])
+  @@index([userId, goalId])
+}
+
+
+model LifeEventVersion {
+  id String @id @default(cuid())
+  userId String
+  eventId String
+  version Int
+  snapshot Json
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event LifeEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  @@unique([eventId, version])
+  @@index([userId, createdAt])
+}
+
+
+model ImportPreviewReceipt {
+  id String @id @default(cuid())
+  userId String
+  nonce String @unique
+  payloadHash String
+  schemaVersion Int
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, expiresAt])
+  @@index([userId, consumedAt, expiresAt])
+}

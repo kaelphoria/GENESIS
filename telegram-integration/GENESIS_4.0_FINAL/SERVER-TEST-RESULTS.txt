@@ -1,0 +1,974 @@
+
+> genesis-private@1.0.0 test
+> node --test tests/*.test.cjs
+
+TAP version 13
+# Subtest: decision, planning and execution use bounded sequential specialist pairs
+ok 1 - decision, planning and execution use bounded sequential specialist pairs
+  ---
+  duration_ms: 2.203453
+  type: 'test'
+  ...
+# Subtest: other intents route to one specialist and unknown intents fail to generalist
+ok 2 - other intents route to one specialist and unknown intents fail to generalist
+  ---
+  duration_ms: 0.234334
+  type: 'test'
+  ...
+# Subtest: personal context capability is included only when explicitly enabled
+ok 3 - personal context capability is included only when explicitly enabled
+  ---
+  duration_ms: 0.579094
+  type: 'test'
+  ...
+# Subtest: agent instructions explicitly prohibit unverified external actions and tool claims
+ok 4 - agent instructions explicitly prohibit unverified external actions and tool claims
+  ---
+  duration_ms: 0.745524
+  type: 'test'
+  ...
+# Subtest: review stages are sequenced and output contract rejects invalid or oversized content
+ok 5 - review stages are sequenced and output contract rejects invalid or oversized content
+  ---
+  duration_ms: 0.296336
+  type: 'test'
+  ...
+# Subtest: trace records agent ids, call count and bounded budget without prompts
+ok 6 - trace records agent ids, call count and bounded budget without prompts
+  ---
+  duration_ms: 0.598353
+  type: 'test'
+  ...
+# Subtest: ORACLE route executes planned stages sequentially and persists the trace
+ok 7 - ORACLE route executes planned stages sequentially and persists the trace
+  ---
+  duration_ms: 0.335776
+  type: 'test'
+  ...
+# Subtest: failed multi-stage runs resume from the last durably completed specialist
+ok 8 - failed multi-stage runs resume from the last durably completed specialist
+  ---
+  duration_ms: 0.251499
+  type: 'test'
+  ...
+# Subtest: public trace excludes intermediate model output while retaining useful diagnostics
+ok 9 - public trace excludes intermediate model output while retaining useful diagnostics
+  ---
+  duration_ms: 0.601337
+  type: 'test'
+  ...
+# Subtest: agent trace uses a new additive migration after the idempotency checkpoint
+ok 10 - agent trace uses a new additive migration after the idempotency checkpoint
+  ---
+  duration_ms: 0.601567
+  type: 'test'
+  ...
+# Subtest: portable export includes persisted request and specialist trace records
+ok 11 - portable export includes persisted request and specialist trace records
+  ---
+  duration_ms: 0.215274
+  type: 'test'
+  ...
+# Subtest: agent trace persists actual provider token usage without inventing monetary cost
+ok 12 - agent trace persists actual provider token usage without inventing monetary cost
+  ---
+  duration_ms: 0.575167
+  type: 'test'
+  ...
+# Subtest: artifact model has project/source relations, lifecycle state and version metadata
+ok 13 - artifact model has project/source relations, lifecycle state and version metadata
+  ---
+  duration_ms: 3.517298
+  type: 'test'
+  ...
+# Subtest: artifact lifecycle migration is additive
+ok 14 - artifact lifecycle migration is additive
+  ---
+  duration_ms: 0.266242
+  type: 'test'
+  ...
+# Subtest: artifact API checks project and source ownership and writes provenance
+ok 15 - artifact API checks project and source ownership and writes provenance
+  ---
+  duration_ms: 0.220613
+  type: 'test'
+  ...
+# Subtest: artifact metadata registration does not pretend file bytes or hashes were stored
+ok 16 - artifact metadata registration does not pretend file bytes or hashes were stored
+  ---
+  duration_ms: 0.268065
+  type: 'test'
+  ...
+# Subtest: project workspace registers artifact metadata, links sources and exposes provenance history
+ok 17 - project workspace registers artifact metadata, links sources and exposes provenance history
+  ---
+  duration_ms: 0.377389
+  type: 'test'
+  ...
+# Subtest: artifact quarantine detects content type, hashes server-side and writes owner-partitioned private files
+ok 18 - artifact quarantine detects content type, hashes server-side and writes owner-partitioned private files
+  ---
+  duration_ms: 20.607251
+  type: 'test'
+  ...
+# Subtest: artifact quarantine rejects spoofed MIME, unsupported binary, oversize and public storage roots
+ok 19 - artifact quarantine rejects spoofed MIME, unsupported binary, oversize and public storage roots
+  ---
+  duration_ms: 3.629923
+  type: 'test'
+  ...
+# Subtest: quarantine deletion is owner-scoped and rejects path traversal
+ok 20 - quarantine deletion is owner-scoped and rejects path traversal
+  ---
+  duration_ms: 9.8786
+  type: 'test'
+  ...
+# Subtest: backup envelope encrypts and restores exact plaintext with authenticated encryption
+ok 21 - backup envelope encrypts and restores exact plaintext with authenticated encryption
+  ---
+  duration_ms: 3.286405
+  type: 'test'
+  ...
+# Subtest: backup envelope rejects a wrong key, tampered ciphertext and changed associated data
+ok 22 - backup envelope rejects a wrong key, tampered ciphertext and changed associated data
+  ---
+  duration_ms: 0.796682
+  type: 'test'
+  ...
+# Subtest: backup envelope fails closed on missing or invalid keys and unsupported format
+ok 23 - backup envelope fails closed on missing or invalid keys and unsupported format
+  ---
+  duration_ms: 0.295936
+  type: 'test'
+  ...
+# Subtest: backup envelope enforces strict encoded fields and bounded payload sizes
+ok 24 - backup envelope enforces strict encoded fields and bounded payload sizes
+  ---
+  duration_ms: 77.493901
+  type: 'test'
+  ...
+# Subtest: planned and disconnected capabilities are never advertised as enabled
+ok 25 - planned and disconnected capabilities are never advertised as enabled
+  ---
+  duration_ms: 1.013789
+  type: 'test'
+  ...
+# Subtest: personal memory requires an explicit context grant
+ok 26 - personal memory requires an explicit context grant
+  ---
+  duration_ms: 0.658733
+  type: 'test'
+  ...
+# Subtest: unknown capability fails closed
+ok 27 - unknown capability fails closed
+  ---
+  duration_ms: 0.102795
+  type: 'test'
+  ...
+# Subtest: chat requests persist scoped idempotency keys and prompt hashes
+ok 28 - chat requests persist scoped idempotency keys and prompt hashes
+  ---
+  duration_ms: 1.097755
+  type: 'test'
+  ...
+# Subtest: completed requests replay and pending requests do not invoke a second completion
+ok 29 - completed requests replay and pending requests do not invoke a second completion
+  ---
+  duration_ms: 0.228855
+  type: 'test'
+  ...
+# Subtest: user message is durably saved before provider execution and not duplicated on retry
+ok 30 - user message is durably saved before provider execution and not duplicated on retry
+  ---
+  duration_ms: 0.202124
+  type: 'test'
+  ...
+# Subtest: client reuses the same request id after a failed send of the same prompt
+ok 31 - client reuses the same request id after a failed send of the same prompt
+  ---
+  duration_ms: 0.131017
+  type: 'test'
+  ...
+# Subtest: request and initial user message are committed atomically; retries use compare-and-set
+ok 32 - request and initial user message are committed atomically; retries use compare-and-set
+  ---
+  duration_ms: 0.251139
+  type: 'test'
+  ...
+# Subtest: stale pending recovery window exceeds the bounded multi-stage provider timeout envelope
+ok 33 - stale pending recovery window exceeds the bounded multi-stage provider timeout envelope
+  ---
+  duration_ms: 0.229456
+  type: 'test'
+  ...
+# Subtest: pricing catalog accepts only dated, non-negative, model-specific USD rates
+ok 34 - pricing catalog accepts only dated, non-negative, model-specific USD rates
+  ---
+  duration_ms: 2.033225
+  type: 'test'
+  ...
+# Subtest: cost remains unknown without an exact provider/model/date match
+ok 35 - cost remains unknown without an exact provider/model/date match
+  ---
+  duration_ms: 0.746847
+  type: 'test'
+  ...
+# Subtest: cost uses the latest effective dated rate and actual token usage
+ok 36 - cost uses the latest effective dated rate and actual token usage
+  ---
+  duration_ms: 0.306332
+  type: 'test'
+  ...
+# Subtest: agent trace exposes monetary cost only when every specialist stage has a matching rate
+ok 37 - agent trace exposes monetary cost only when every specialist stage has a matching rate
+  ---
+  duration_ms: 1.387632
+  type: 'test'
+  ...
+# Subtest: cached input tokens require a separately configured cached-input rate for exact cost
+ok 38 - cached input tokens require a separately configured cached-input rate for exact cost
+  ---
+  duration_ms: 0.314264
+  type: 'test'
+  ...
+# Subtest: execution and decision domain models are owned by the user and connected by explicit relations
+ok 39 - execution and decision domain models are owned by the user and connected by explicit relations
+  ---
+  duration_ms: 1.079428
+  type: 'test'
+  ...
+# Subtest: execution domain migration is additive and preserves existing action records
+ok 40 - execution domain migration is additive and preserves existing action records
+  ---
+  duration_ms: 0.609328
+  type: 'test'
+  ...
+# Subtest: project, milestone, decision and experiment APIs enforce same-origin mutations and ownership filters
+ok 41 - project, milestone, decision and experiment APIs enforce same-origin mutations and ownership filters
+  ---
+  duration_ms: 0.33134
+  type: 'test'
+  ...
+# Subtest: account export contains execution and decision continuity records
+ok 42 - account export contains execution and decision continuity records
+  ---
+  duration_ms: 0.259311
+  type: 'test'
+  ...
+# Subtest: canonical dashboard exposes Projects and Decision Lab navigation
+ok 43 - canonical dashboard exposes Projects and Decision Lab navigation
+  ---
+  duration_ms: 0.883472
+  type: 'test'
+  ...
+# Subtest: project workspace creates projects and milestones and supports milestone lifecycle updates
+ok 44 - project workspace creates projects and milestones and supports milestone lifecycle updates
+  ---
+  duration_ms: 0.239331
+  type: 'test'
+  ...
+# Subtest: decision workspace records options, selected outcomes and experiments
+ok 45 - decision workspace records options, selected outcomes and experiments
+  ---
+  duration_ms: 0.330428
+  type: 'test'
+  ...
+# Subtest: decision API returns project context and related experiments
+ok 46 - decision API returns project context and related experiments
+  ---
+  duration_ms: 0.39809
+  type: 'test'
+  ...
+# Subtest: account export declares a stable format and schema version
+ok 47 - account export declares a stable format and schema version
+  ---
+  duration_ms: 1.118657
+  type: 'test'
+  ...
+# Subtest: account export includes memory context permissions and continuity records
+ok 48 - account export includes memory context permissions and continuity records
+  ---
+  duration_ms: 0.219621
+  type: 'test'
+  ...
+# Subtest: account export is private and records an audit event
+ok 49 - account export is private and records an audit event
+  ---
+  duration_ms: 0.103236
+  type: 'test'
+  ...
+# Subtest: Goal is user-owned and connects worlds, projects, actions, decisions and Life Timeline events
+ok 50 - Goal is user-owned and connects worlds, projects, actions, decisions and Life Timeline events
+  ---
+  duration_ms: 1.076833
+  type: 'test'
+  ...
+# Subtest: Goal migration is additive and preserves linked records when a goal is removed
+ok 51 - Goal migration is additive and preserves linked records when a goal is removed
+  ---
+  duration_ms: 0.279171
+  type: 'test'
+  ...
+# Subtest: Goal API is authenticated, same-origin on writes, owner-scoped and validates world ownership
+ok 52 - Goal API is authenticated, same-origin on writes, owner-scoped and validates world ownership
+  ---
+  duration_ms: 0.1463
+  type: 'test'
+  ...
+# Subtest: Projects, actions, decisions and events validate goal ownership before linking
+ok 53 - Projects, actions, decisions and events validate goal ownership before linking
+  ---
+  duration_ms: 0.195756
+  type: 'test'
+  ...
+# Subtest: Dashboard and execution workspaces expose Goals and link related records
+ok 54 - Dashboard and execution workspaces expose Goals and link related records
+  ---
+  duration_ms: 0.438131
+  type: 'test'
+  ...
+# Subtest: Account export schema 6 includes goals and import preview validates cross-links
+ok 55 - Account export schema 6 includes goals and import preview validates cross-links
+  ---
+  duration_ms: 0.280012
+  type: 'test'
+  ...
+# Subtest: account import preview accepts a complete version-one export without mutating data
+ok 56 - account import preview accepts a complete version-one export without mutating data
+  ---
+  duration_ms: 1.110724
+  type: 'test'
+  ...
+# Subtest: account import preview detects duplicate IDs and dangling relations
+ok 57 - account import preview detects duplicate IDs and dangling relations
+  ---
+  duration_ms: 0.271719
+  type: 'test'
+  ...
+# Subtest: account import preview rejects future schema versions and malformed collections
+ok 58 - account import preview rejects future schema versions and malformed collections
+  ---
+  duration_ms: 0.969762
+  type: 'test'
+  ...
+# Subtest: preview endpoint is authenticated, same-origin and only writes a one-time receipt ledger entry
+ok 59 - preview endpoint is authenticated, same-origin and only writes a one-time receipt ledger entry
+  ---
+  duration_ms: 0.314244
+  type: 'test'
+  ...
+# Subtest: preview supports earlier declared account export versions with compatibility warnings for missing arrays
+ok 60 - preview supports earlier declared account export versions with compatibility warnings for missing arrays
+  ---
+  duration_ms: 0.234964
+  type: 'test'
+  ...
+# Subtest: version-four preview validates Life Timeline links to owned export collections
+ok 61 - version-four preview validates Life Timeline links to owned export collections
+  ---
+  duration_ms: 0.148514
+  type: 'test'
+  ...
+# Subtest: version-five preview validates immutable Life Timeline version references
+ok 62 - version-five preview validates immutable Life Timeline version references
+  ---
+  duration_ms: 0.124818
+  type: 'test'
+  ...
+# Subtest: version-six preview validates goal references across projects, actions, decisions and events
+ok 63 - version-six preview validates goal references across projects, actions, decisions and events
+  ---
+  duration_ms: 0.120772
+  type: 'test'
+  ...
+# Subtest: import preview receipts are persisted, owner-cascaded and uniquely nonce-bound
+ok 64 - import preview receipts are persisted, owner-cascaded and uniquely nonce-bound
+  ---
+  duration_ms: 0.845335
+  type: 'test'
+  ...
+# Subtest: future import apply has an atomic conditional one-time receipt consume primitive
+ok 65 - future import apply has an atomic conditional one-time receipt consume primitive
+  ---
+  duration_ms: 0.329517
+  type: 'test'
+  ...
+# Subtest: preview receipt is signed, user-bound, payload-bound and expires
+ok 66 - preview receipt is signed, user-bound, payload-bound and expires
+  ---
+  duration_ms: 2.332567
+  type: 'test'
+  ...
+# Subtest: preview receipt fails closed without a strong signing secret or with tampering
+ok 67 - preview receipt fails closed without a strong signing secret or with tampering
+  ---
+  duration_ms: 0.445021
+  type: 'test'
+  ...
+# Subtest: import preview receipt binds the exact raw payload hash and does not mutate records
+ok 68 - import preview receipt binds the exact raw payload hash and does not mutate records
+  ---
+  duration_ms: 0.341955
+  type: 'test'
+  ...
+# Subtest: receipt consumption is atomic, one-time and bound to the persisted nonce
+ok 69 - receipt consumption is atomic, one-time and bound to the persisted nonce
+  ---
+  duration_ms: 3.728522
+  type: 'test'
+  ...
+# Subtest: preview endpoint uses a streaming byte limit and persists receipt nonce
+ok 70 - preview endpoint uses a streaming byte limit and persists receipt nonce
+  ---
+  duration_ms: 0.207834
+  type: 'test'
+  ...
+# Subtest: classifies common Russian and English intent categories
+ok 71 - classifies common Russian and English intent categories
+  ---
+  duration_ms: 2.351736
+  type: 'test'
+  ...
+# Subtest: does not overstate confidence and handles empty input
+ok 72 - does not overstate confidence and handles empty input
+  ---
+  duration_ms: 0.378551
+  type: 'test'
+  ...
+# Subtest: local PWA keeps backward-compatible localStorage and mirrors snapshots to IndexedDB
+ok 73 - local PWA keeps backward-compatible localStorage and mirrors snapshots to IndexedDB
+  ---
+  duration_ms: 0.919486
+  type: 'test'
+  ...
+# Subtest: snapshot and opt-in outbox updates share one IndexedDB transaction
+ok 74 - snapshot and opt-in outbox updates share one IndexedDB transaction
+  ---
+  duration_ms: 0.228966
+  type: 'test'
+  ...
+# Subtest: local sync opt-in is explicit and does not transmit data to a remote service
+ok 75 - local sync opt-in is explicit and does not transmit data to a remote service
+  ---
+  duration_ms: 0.267494
+  type: 'test'
+  ...
+# Subtest: backup export is versioned and import validates before replacement with a safety copy
+ok 76 - backup export is versioned and import validates before replacement with a safety copy
+  ---
+  duration_ms: 0.31163
+  type: 'test'
+  ...
+# Subtest: encrypted personal backup uses authenticated WebCrypto and a password-derived key
+ok 77 - encrypted personal backup uses authenticated WebCrypto and a password-derived key
+  ---
+  duration_ms: 0.613115
+  type: 'test'
+  ...
+# Subtest: personal workspace includes goals, projects, decisions, timeline and context-controlled ORACLE
+ok 78 - personal workspace includes goals, projects, decisions, timeline and context-controlled ORACLE
+  ---
+  duration_ms: 0.284028
+  type: 'test'
+  ...
+# Subtest: service worker caches the IndexedDB adapter as part of the static shell
+ok 79 - service worker caches the IndexedDB adapter as part of the static shell
+  ---
+  duration_ms: 1.077805
+  type: 'test'
+  ...
+# Subtest: disabling sync consent purges queued personal snapshots
+ok 80 - disabling sync consent purges queued personal snapshots
+  ---
+  duration_ms: 0.123587
+  type: 'test'
+  ...
+# Subtest: corrupt legacy localStorage does not block IndexedDB recovery
+ok 81 - corrupt legacy localStorage does not block IndexedDB recovery
+  ---
+  duration_ms: 0.35817
+  type: 'test'
+  ...
+# Subtest: LifeEvent model is user-owned and links optional project, decision and source context
+ok 82 - LifeEvent model is user-owned and links optional project, decision and source context
+  ---
+  duration_ms: 3.111081
+  type: 'test'
+  ...
+# Subtest: Life Timeline migration is additive and indexed by owner/date/category
+ok 83 - Life Timeline migration is additive and indexed by owner/date/category
+  ---
+  duration_ms: 0.277178
+  type: 'test'
+  ...
+# Subtest: Life Event API enforces authentication, same-origin writes and ownership for linked records
+ok 84 - Life Event API enforces authentication, same-origin writes and ownership for linked records
+  ---
+  duration_ms: 0.124237
+  type: 'test'
+  ...
+# Subtest: Life Event updates use optimistic version checks and deletes are owner-scoped
+ok 85 - Life Event updates use optimistic version checks and deletes are owner-scoped
+  ---
+  duration_ms: 0.322476
+  type: 'test'
+  ...
+# Subtest: Versioned account export includes Life Timeline records in schema version 6
+ok 86 - Versioned account export includes Life Timeline records in schema version 6
+  ---
+  duration_ms: 0.29191
+  type: 'test'
+  ...
+# Subtest: Dashboard exposes the Life Timeline and links it to project, decision and source registries
+ok 87 - Dashboard exposes the Life Timeline and links it to project, decision and source registries
+  ---
+  duration_ms: 0.151108
+  type: 'test'
+  ...
+# Subtest: LifeEventVersion stores immutable JSON snapshots with per-event version uniqueness
+ok 88 - LifeEventVersion stores immutable JSON snapshots with per-event version uniqueness
+  ---
+  duration_ms: 0.305811
+  type: 'test'
+  ...
+# Subtest: Life Event API snapshots every create/update and exposes owner-scoped version history
+ok 89 - Life Event API snapshots every create/update and exposes owner-scoped version history
+  ---
+  duration_ms: 0.103406
+  type: 'test'
+  ...
+# Subtest: Life Timeline UI supports editing and displays prior snapshots
+ok 90 - Life Timeline UI supports editing and displays prior snapshots
+  ---
+  duration_ms: 0.893737
+  type: 'test'
+  ...
+# Subtest: MCP initialize negotiates a supported protocol and advertises only tools
+ok 91 - MCP initialize negotiates a supported protocol and advertises only tools
+  ---
+  duration_ms: 1.648576
+  type: 'test'
+  ...
+# Subtest: MCP tools/list is blocked until initialized notification arrives
+ok 92 - MCP tools/list is blocked until initialized notification arrives
+  ---
+  duration_ms: 0.184859
+  type: 'test'
+  ...
+# Subtest: MCP tools/call returns structured data and safe tool errors
+ok 93 - MCP tools/call returns structured data and safe tool errors
+  ---
+  duration_ms: 0.408836
+  type: 'test'
+  ...
+# Subtest: MCP notifications produce no response and unknown methods use JSON-RPC method errors
+ok 94 - MCP notifications produce no response and unknown methods use JSON-RPC method errors
+  ---
+  duration_ms: 0.133291
+  type: 'test'
+  ...
+# Subtest: MCP selects the current supported protocol when a client requests an unknown revision
+ok 95 - MCP selects the current supported protocol when a client requests an unknown revision
+  ---
+  duration_ms: 0.161223
+  type: 'test'
+  ...
+# Subtest: MCP cannot complete initialization before initialize and reinitialize resets session state
+ok 96 - MCP cannot complete initialization before initialize and reinitialize resets session state
+  ---
+  duration_ms: 0.416668
+  type: 'test'
+  ...
+# Subtest: MCP validates JSON-RPC IDs, params and bounded tool arguments
+ok 97 - MCP validates JSON-RPC IDs, params and bounded tool arguments
+  ---
+  duration_ms: 0.423889
+  type: 'test'
+  ...
+# Subtest: MCP initialization notification rejects request IDs
+ok 98 - MCP initialization notification rejects request IDs
+  ---
+  duration_ms: 0.201394
+  type: 'test'
+  ...
+# Subtest: MCP registry refuses to initialize without an explicit owner scope
+ok 99 - MCP registry refuses to initialize without an explicit owner scope
+  ---
+  duration_ms: 1.105386
+  type: 'test'
+  ...
+# Subtest: MCP tools are read-only and expose bounded schemas
+ok 100 - MCP tools are read-only and expose bounded schemas
+  ---
+  duration_ms: 0.355015
+  type: 'test'
+  ...
+# Subtest: every collection query is scoped to the configured owner
+ok 101 - every collection query is scoped to the configured owner
+  ---
+  duration_ms: 2.49435
+  type: 'test'
+  ...
+# Subtest: MCP memory search enforces explicit consent and active lifecycle status
+ok 102 - MCP memory search enforces explicit consent and active lifecycle status
+  ---
+  duration_ms: 0.160361
+  type: 'test'
+  ...
+# Subtest: MCP query limits are clamped and invalid date ranges fail closed
+ok 103 - MCP query limits are clamped and invalid date ranges fail closed
+  ---
+  duration_ms: 0.405061
+  type: 'test'
+  ...
+# Subtest: MCP tool registry rejects unknown tools and empty memory queries
+ok 104 - MCP tool registry rejects unknown tools and empty memory queries
+  ---
+  duration_ms: 0.329927
+  type: 'test'
+  ...
+# Subtest: MCP rejects unknown arguments and invalid filters rather than widening a query
+ok 105 - MCP rejects unknown arguments and invalid filters rather than widening a query
+  ---
+  duration_ms: 0.315356
+  type: 'test'
+  ...
+# Subtest: MCP temporal history and conversation continuity remain owner-scoped and consent-gated
+ok 106 - MCP temporal history and conversation continuity remain owner-scoped and consent-gated
+  ---
+  duration_ms: 1.38633
+  type: 'test'
+  ...
+# Subtest: memory provenance schema tracks source references, versions and immutable event history
+ok 107 - memory provenance schema tracks source references, versions and immutable event history
+  ---
+  duration_ms: 0.944193
+  type: 'test'
+  ...
+# Subtest: provenance migration is additive and leaves existing memories intact
+ok 108 - provenance migration is additive and leaves existing memories intact
+  ---
+  duration_ms: 0.340183
+  type: 'test'
+  ...
+# Subtest: memory creation writes version one and a provenance event transactionally
+ok 109 - memory creation writes version one and a provenance event transactionally
+  ---
+  duration_ms: 0.157708
+  type: 'test'
+  ...
+# Subtest: memory edits use optimistic concurrency and preserve a version snapshot
+ok 110 - memory edits use optimistic concurrency and preserve a version snapshot
+  ---
+  duration_ms: 1.004755
+  type: 'test'
+  ...
+# Subtest: source references are checked against the current user before attaching to memory
+ok 111 - source references are checked against the current user before attaching to memory
+  ---
+  duration_ms: 0.164468
+  type: 'test'
+  ...
+# Subtest: source registry marks all newly registered sources unverified and never fetches their URLs
+ok 112 - source registry marks all newly registered sources unverified and never fetches their URLs
+  ---
+  duration_ms: 0.124037
+  type: 'test'
+  ...
+# Subtest: versioned account export includes sources, memory versions and provenance events
+ok 113 - versioned account export includes sources, memory versions and provenance events
+  ---
+  duration_ms: 0.177138
+  type: 'test'
+  ...
+# Subtest: canonical dashboard exposes source trust labels and version history to the record owner
+ok 114 - canonical dashboard exposes source trust labels and version history to the record owner
+  ---
+  duration_ms: 0.451641
+  type: 'test'
+  ...
+# Subtest: memory workspace lets the user register an unverified source and attach it to a new record
+ok 115 - memory workspace lets the user register an unverified source and attach it to a new record
+  ---
+  duration_ms: 0.445432
+  type: 'test'
+  ...
+# Subtest: source registration does not trust client-supplied content hashes
+ok 116 - source registration does not trust client-supplied content hashes
+  ---
+  duration_ms: 1.490267
+  type: 'test'
+  ...
+# Subtest: conversation migration preserves legacy messages before enforcing ownership
+ok 117 - conversation migration preserves legacy messages before enforcing ownership
+  ---
+  duration_ms: 1.499862
+  type: 'test'
+  ...
+# Subtest: memory lifecycle migration is additive and retains canonical memory content
+ok 118 - memory lifecycle migration is additive and retains canonical memory content
+  ---
+  duration_ms: 0.498632
+  type: 'test'
+  ...
+# Subtest: Ollama chat adapter sends bounded non-streaming requests and normalizes usage
+ok 119 - Ollama chat adapter sends bounded non-streaming requests and normalizes usage
+  ---
+  duration_ms: 1.589206
+  type: 'test'
+  ...
+# Subtest: Ollama adapter rejects non-loopback plaintext endpoints and embedded credentials
+ok 120 - Ollama adapter rejects non-loopback plaintext endpoints and embedded credentials
+  ---
+  duration_ms: 0.942801
+  type: 'test'
+  ...
+# Subtest: Ollama adapter maps rate limits and empty responses without leaking response bodies
+ok 121 - Ollama adapter maps rate limits and empty responses without leaking response bodies
+  ---
+  duration_ms: 0.560785
+  type: 'test'
+  ...
+# Subtest: Ollama embeddings enforce the existing pgvector dimension contract
+ok 122 - Ollama embeddings enforce the existing pgvector dimension contract
+  ---
+  duration_ms: 1.524699
+  type: 'test'
+  ...
+# Subtest: Ollama adapter requires explicit model configuration
+ok 123 - Ollama adapter requires explicit model configuration
+  ---
+  duration_ms: 0.200222
+  type: 'test'
+  ...
+# Subtest: rate-limit maintenance is dry-run by default and has a separate explicit apply gate
+ok 124 - rate-limit maintenance is dry-run by default and has a separate explicit apply gate
+  ---
+  duration_ms: 0.948561
+  type: 'test'
+  ...
+# Subtest: rate-limit cleanup has a minimum seven-day retention and touches no user records
+ok 125 - rate-limit cleanup has a minimum seven-day retention and touches no user records
+  ---
+  duration_ms: 0.33839
+  type: 'test'
+  ...
+# Subtest: authenticated diagnostics expose aggregate health counts without personal content or secrets
+ok 126 - authenticated diagnostics expose aggregate health counts without personal content or secrets
+  ---
+  duration_ms: 0.225089
+  type: 'test'
+  ...
+# Subtest: import receipt cleanup is dry-run by default and separately confirmed
+ok 127 - import receipt cleanup is dry-run by default and separately confirmed
+  ---
+  duration_ms: 0.429177
+  type: 'test'
+  ...
+# Subtest: context manifest records provenance and does not claim independent verification
+ok 128 - context manifest records provenance and does not claim independent verification
+  ---
+  duration_ms: 2.617337
+  type: 'test'
+  ...
+# Subtest: context manifest respects the character budget and marks truncation
+ok 129 - context manifest respects the character budget and marks truncation
+  ---
+  duration_ms: 0.184658
+  type: 'test'
+  ...
+# Subtest: empty context produces an explicit no-context statement
+ok 130 - empty context produces an explicit no-context statement
+  ---
+  duration_ms: 0.113421
+  type: 'test'
+  ...
+# Subtest: memory context retains source trust metadata without upgrading the memory trust claim
+ok 131 - memory context retains source trust metadata without upgrading the memory trust claim
+  ---
+  duration_ms: 0.603951
+  type: 'test'
+  ...
+# Subtest: provider boundary has a finite timeout and no SDK-internal retries
+ok 132 - provider boundary has a finite timeout and no SDK-internal retries
+  ---
+  duration_ms: 1.518309
+  type: 'test'
+  ...
+# Subtest: provider retries are bounded to one additional transient attempt
+ok 133 - provider retries are bounded to one additional transient attempt
+  ---
+  duration_ms: 0.164298
+  type: 'test'
+  ...
+# Subtest: provider errors are typed and do not expose upstream response bodies
+ok 134 - provider errors are typed and do not expose upstream response bodies
+  ---
+  duration_ms: 0.16575
+  type: 'test'
+  ...
+# Subtest: embeddings use the provider boundary with a shorter timeout and bounded retries
+ok 135 - embeddings use the provider boundary with a shorter timeout and bounded retries
+  ---
+  duration_ms: 0.197097
+  type: 'test'
+  ...
+# Subtest: memory embedding service delegates all provider calls to the shared boundary
+ok 136 - memory embedding service delegates all provider calls to the shared boundary
+  ---
+  duration_ms: 1.18726
+  type: 'test'
+  ...
+# Subtest: chat completion propagates request cancellation to the provider and classifies aborts
+ok 137 - chat completion propagates request cancellation to the provider and classifies aborts
+  ---
+  duration_ms: 0.231138
+  type: 'test'
+  ...
+# Subtest: provider usage captures cached input tokens separately for correct cost accounting
+ok 138 - provider usage captures cached input tokens separately for correct cost accounting
+  ---
+  duration_ms: 1.519471
+  type: 'test'
+  ...
+# Subtest: provider router exposes an explicit local Ollama adapter without changing the default provider
+ok 139 - provider router exposes an explicit local Ollama adapter without changing the default provider
+  ---
+  duration_ms: 0.195134
+  type: 'test'
+  ...
+# Subtest: chat route supports explicitly selected Ollama without requiring an OpenAI key
+ok 140 - chat route supports explicitly selected Ollama without requiring an OpenAI key
+  ---
+  duration_ms: 0.854158
+  type: 'test'
+  ...
+# Subtest: chat route defaults personal context to off and requires an explicit true value
+ok 141 - chat route defaults personal context to off and requires an explicit true value
+  ---
+  duration_ms: 0.39151
+  type: 'test'
+  ...
+# Subtest: durable rate limit migration stores only hashed keys and has cleanup index
+ok 142 - durable rate limit migration stores only hashed keys and has cleanup index
+  ---
+  duration_ms: 1.132758
+  type: 'test'
+  ...
+# Subtest: login, registration, and ORACLE enforce durable rate limits
+ok 143 - login, registration, and ORACLE enforce durable rate limits
+  ---
+  duration_ms: 0.531802
+  type: 'test'
+  ...
+# Subtest: rate limit keys are HMAC digests and database increments are atomic
+ok 144 - rate limit keys are HMAC digests and database increments are atomic
+  ---
+  duration_ms: 0.253833
+  type: 'test'
+  ...
+# Subtest: origin validation runs before rate-limit storage is touched
+ok 145 - origin validation runs before rate-limit storage is touched
+  ---
+  duration_ms: 1.523267
+  type: 'test'
+  ...
+# Subtest: chat uses the provider boundary for both embeddings and completion
+ok 146 - chat uses the provider boundary for both embeddings and completion
+  ---
+  duration_ms: 0.280564
+  type: 'test'
+  ...
+# Subtest: ORACLE retrieval is restricted to explicitly granted memories
+ok 147 - ORACLE retrieval is restricted to explicitly granted memories
+  ---
+  duration_ms: 0.182776
+  type: 'test'
+  ...
+# Subtest: memory API accepts only explicit grant or revoke values and audits the change
+ok 148 - memory API accepts only explicit grant or revoke values and audits the change
+  ---
+  duration_ms: 0.349778
+  type: 'test'
+  ...
+# Subtest: memory governance migration defaults all existing records to private
+ok 149 - memory governance migration defaults all existing records to private
+  ---
+  duration_ms: 0.138729
+  type: 'test'
+  ...
+# Subtest: memory interface exposes an explicit per-record grant and revoke control
+ok 150 - memory interface exposes an explicit per-record grant and revoke control
+  ---
+  duration_ms: 0.403208
+  type: 'test'
+  ...
+# Subtest: chat returns the exact context manifest and UI exposes a Context Inspector
+ok 151 - chat returns the exact context manifest and UI exposes a Context Inspector
+  ---
+  duration_ms: 0.620676
+  type: 'test'
+  ...
+# Subtest: production preflight rejects missing secrets and non-TLS database/app origins
+ok 152 - production preflight rejects missing secrets and non-TLS database/app origins
+  ---
+  duration_ms: 59.244701
+  type: 'test'
+  ...
+# Subtest: production preflight accepts canonical HTTPS origins and TLS PostgreSQL
+ok 153 - production preflight accepts canonical HTTPS origins and TLS PostgreSQL
+  ---
+  duration_ms: 46.109762
+  type: 'test'
+  ...
+# Subtest: production preflight rejects origin paths and mismatched app origins
+ok 154 - production preflight rejects origin paths and mismatched app origins
+  ---
+  duration_ms: 41.131496
+  type: 'test'
+  ...
+# Subtest: development preflight permits loopback PostgreSQL without production HTTPS settings
+ok 155 - development preflight permits loopback PostgreSQL without production HTTPS settings
+  ---
+  duration_ms: 44.612019
+  type: 'test'
+  ...
+# Subtest: origin policy accepts same origin and rejects hostile or absent origins
+ok 156 - origin policy accepts same origin and rejects hostile or absent origins
+  ---
+  duration_ms: 0.953528
+  type: 'test'
+  ...
+# Subtest: every mutating API handler is protected by the same-origin guard
+ok 157 - every mutating API handler is protected by the same-origin guard
+  ---
+  duration_ms: 5.346271
+  type: 'test'
+  ...
+# Subtest: activation deletes only previous GENESIS caches
+ok 158 - activation deletes only previous GENESIS caches
+  ---
+  duration_ms: 3.374919
+  type: 'test'
+  ...
+# Subtest: service worker bypasses API, dynamic routes, and cross-origin requests
+ok 159 - service worker bypasses API, dynamic routes, and cross-origin requests
+  ---
+  duration_ms: 24.404641
+  type: 'test'
+  ...
+# Subtest: service worker bypasses requests carrying authorization or cookies
+ok 160 - service worker bypasses requests carrying authorization or cookies
+  ---
+  duration_ms: 1.332459
+  type: 'test'
+  ...
+1..160
+# tests 160
+# suites 0
+# pass 160
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2215.258736

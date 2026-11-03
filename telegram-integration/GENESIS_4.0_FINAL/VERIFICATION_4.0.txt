@@ -1,0 +1,19 @@
+GENESIS 4.0 verification record
+Date: 2026-11-03
+
+PASS: input 3.1 archives integrity checked before modification.
+PASS: PWA inline JavaScript syntax (`node --check`).
+PASS: PWA storage.js syntax (`node --check`).
+PASS: PWA service worker syntax (`node --check`).
+PASS: combined automated test suite: 168/168 (160 server contract/unit + 4 local ORACLE + 4 GENESIS 4.0 Decision Lab).
+PASS: release ZIP integrity checked after packaging.
+
+NOT RUN / NOT VERIFIED:
+- npm ci / dependency install (no lockfile in source; no deterministic dependency tree).
+- Next.js typecheck or production build.
+- Prisma client generation, schema validation, PostgreSQL/pgvector migration and integration tests.
+- Browser visual E2E and iPhone Safari installation/interaction.
+- Live provider/LLM request, real multi-device sync, backup restore drill, external security review.
+- Cloud/private deployment.
+
+The test suite consists largely of contract/unit tests; it does not substitute for live infrastructure verification.
