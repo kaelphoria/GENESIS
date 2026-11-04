@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const html = fs.readFileSync(path.join(__dirname, '../pwa/index.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '../site/index.html'), 'utf8');
 const script = html.slice(html.lastIndexOf('<script>') + 8, html.lastIndexOf('</script>'));
 test('ORACLE local workspace supports multiple durable sessions and assistant messages', () => {
   assert.match(script, /oracleSessions\.slice\(-20\)/);

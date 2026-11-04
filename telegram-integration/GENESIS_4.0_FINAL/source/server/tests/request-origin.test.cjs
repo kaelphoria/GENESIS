@@ -35,6 +35,14 @@ test('every mutating API handler is protected by the same-origin guard', () => {
   }
   assert.ok(mutations.length >= 10, `expected broad mutation coverage, found ${mutations.length}`);
   for (const item of mutations) {
-    assert.match(item.source, /requireSameOrigin\s*\(/, `${path.relative(apiRoot, item.file)} ${item.method} missing origin guard`);
+    const relative = path.relative(apiRoot, item.file).replaceAll('\\', '/');
+    if (relative === 'telegram/webhook/route.ts') {
+      // Telegram server-to-server webhooks authenticate with Telegram's secret header,
+      // not a browser Origin header. Keep this exception narrow and explicit.
+      assert.match(item.source, /TELEGRAM_WEBHOOK_SECRET/);
+      assert.match(item.source, /x-telegram-bot-api-secret-token/);
+      continue;
+    }
+    assert.match(item.source, /requireSameOrigin\s*\(/, `${relative} ${item.method} missing origin guard`);
   }
 });

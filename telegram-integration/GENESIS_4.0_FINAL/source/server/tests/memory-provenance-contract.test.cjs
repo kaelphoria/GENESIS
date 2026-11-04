@@ -10,11 +10,11 @@ const sourceRoute = fs.readFileSync(path.join(root, 'app/api/sources/route.ts'),
 const exportRoute = fs.readFileSync(path.join(root, 'app/api/export/route.ts'), 'utf8');
 
 test('memory provenance schema tracks source references, versions and immutable event history', () => {
-  assert.match(schema, /model Source \{/);
-  assert.match(schema, /model MemoryVersion \{/);
-  assert.match(schema, /model ProvenanceEvent \{/);
-  assert.match(schema, /sourceRef Source\?/);
-  assert.match(schema, /@@unique\(\[memoryId, version\]\)/);
+  assert.match(schema.replace(/\s+/g, ' '), /model Source \{/);
+  assert.match(schema.replace(/\s+/g, ' '), /model MemoryVersion \{/);
+  assert.match(schema.replace(/\s+/g, ' '), /model ProvenanceEvent \{/);
+  assert.match(schema.replace(/\s+/g, ' '), /sourceRef Source\?/);
+  assert.match(schema.replace(/\s+/g, ' '), /@@unique\(\[memoryId, version\]\)/);
 });
 
 test('provenance migration is additive and leaves existing memories intact', () => {

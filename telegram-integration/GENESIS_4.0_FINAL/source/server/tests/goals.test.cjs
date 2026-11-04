@@ -15,13 +15,13 @@ const goalsUi = fs.readFileSync(path.join(root, 'components/GoalsWorkspace.tsx')
 const exportRoute = fs.readFileSync(path.join(root, 'app/api/export/route.ts'), 'utf8');
 
 test('Goal is user-owned and connects worlds, projects, actions, decisions and Life Timeline events', () => {
-  assert.match(schema, /model Goal \{[\s\S]*?user User @relation/);
-  assert.match(schema, /world World\? @relation\(fields: \[worldId\], references: \[id\], onDelete: SetNull\)/);
-  assert.match(schema, /projects Project\[\]/);
-  assert.match(schema, /actions Action\[\]/);
-  assert.match(schema, /decisions Decision\[\]/);
-  assert.match(schema, /lifeEvents LifeEvent\[\]/);
-  for (const model of ['Action', 'Project', 'Decision', 'LifeEvent']) assert.match(schema, new RegExp(`model ${model} \\{[\\s\\S]*?goalId String\\?[\\s\\S]*?goal Goal\\?`));
+  assert.match(schema.replace(/\s+/g, ' '), /model Goal \{[\s\S]*?user User @relation/);
+  assert.match(schema.replace(/\s+/g, ' '), /world World\? @relation\(fields: \[worldId\], references: \[id\], onDelete: SetNull\)/);
+  assert.match(schema.replace(/\s+/g, ' '), /projects Project\[\]/);
+  assert.match(schema.replace(/\s+/g, ' '), /actions Action\[\]/);
+  assert.match(schema.replace(/\s+/g, ' '), /decisions Decision\[\]/);
+  assert.match(schema.replace(/\s+/g, ' '), /lifeEvents LifeEvent\[\]/);
+  for (const model of ['Action', 'Project', 'Decision', 'LifeEvent']) assert.match(schema.replace(/\s+/g, ' '), new RegExp(`model ${model} \\{[\\s\\S]*?goalId String\\?[\\s\\S]*?goal Goal\\?`));
 });
 
 test('Goal migration is additive and preserves linked records when a goal is removed', () => {
