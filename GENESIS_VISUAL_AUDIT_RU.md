@@ -54,5 +54,5 @@
 ## 8. Этап 2 (рефакторинг)
 - `components/ConfirmDialog.tsx` (новый): диалог подтверждения вместо `confirm()`/`prompt()` в Dashboard (удаление действия, записи памяти, аккаунта с вводом фразы). Закрывается по Esc и тапу вне окна.
 - `components/WorldTile.tsx` (новый): общий компонент плитки мира, убрано дублирование разметки (2 места).
-- Остаются `confirm()` в `GoalsWorkspace.tsx` и `LifeTimeline.tsx` — заменить тем же `useConfirm` отдельным шагом.
+- `confirm()` в `GoalsWorkspace.tsx` и `LifeTimeline.tsx` тоже заменены на `useConfirm`: в components не осталось `confirm()`/`prompt()`.
 - Пункты 5 и 6 списка ошибок закрыты (для Dashboard).
