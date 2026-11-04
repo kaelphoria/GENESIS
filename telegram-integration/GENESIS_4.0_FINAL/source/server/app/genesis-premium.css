@@ -150,3 +150,103 @@ input,select,textarea{font-size:16px}                                  /* без
 .world-number span,.auth-legal{color:#9d9c93}
 .action-info.is-done b{color:#8a8981}
 .manual-compose textarea::placeholder{color:#8593a0}
+
+/* =====================================================================
+   v2 — Liquid-Glass-подход (iOS 26/27) + Telegram Mini App
+   Принципы: стекло только в навигационном «хроме», контент на
+   плотных поверхностях (читаемость), пружинные переходы,
+   учёт safe-area Telegram, уважение к настройкам прозрачности/контраста.
+   ===================================================================== */
+:root{
+  --safe-t:calc(max(env(safe-area-inset-top,0px),var(--tg-safe-area-inset-top,0px)) + var(--tg-content-safe-area-inset-top,0px));
+  --safe-b:max(env(safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px));
+  --spring:cubic-bezier(.34,1.35,.5,1);
+}
+@supports (transition-timing-function:linear(0,1)){
+  :root{--spring:linear(0,.009,.035 2.1%,.141 4.4%,.723 12.9%,.938 16.7%,1.017 20.6%,1.049 23.5%,1.054 26.5%,1.034 31.4%,1.008 37.5%,.998 44%,1)}
+}
+
+/* Живой фон: медленное «северное сияние» (только transform → дёшево для GPU) */
+body::before{
+  content:'';position:fixed;inset:-25%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(40% 30% at 70% 20%,rgba(193,164,109,.16),transparent 70%),
+    radial-gradient(35% 28% at 20% 75%,rgba(110,135,170,.12),transparent 70%);
+  filter:blur(40px);opacity:.75;will-change:transform;
+  animation:gx-aurora 32s ease-in-out infinite alternate;
+}
+@keyframes gx-aurora{from{transform:translate3d(-3%,-2%,0) scale(1)}to{transform:translate3d(4%,3%,0) scale(1.12)}}
+
+/* Каскадное появление плиток и карточек */
+.world-grid>*,.memory-grid>*,.settings-grid>*,.metric-grid>*{animation:gx-rise .6s var(--ease) both;animation-delay:calc(var(--i,0)*45ms)}
+.world-grid>:nth-child(1),.memory-grid>:nth-child(1),.settings-grid>:nth-child(1),.metric-grid>:nth-child(1){--i:1}
+.world-grid>:nth-child(2),.memory-grid>:nth-child(2),.settings-grid>:nth-child(2),.metric-grid>:nth-child(2){--i:2}
+.world-grid>:nth-child(3),.memory-grid>:nth-child(3),.settings-grid>:nth-child(3),.metric-grid>:nth-child(3){--i:3}
+.world-grid>:nth-child(4),.memory-grid>:nth-child(4),.settings-grid>:nth-child(4),.metric-grid>:nth-child(4){--i:4}
+.world-grid>:nth-child(5){--i:5}.world-grid>:nth-child(6){--i:6}.world-grid>:nth-child(7){--i:7}
+.world-grid>:nth-child(8){--i:8}.world-grid>:nth-child(9){--i:9}
+
+/* Появление при прокрутке (scroll-driven animations), где поддерживается */
+@supports (animation-timeline:view()){
+  .memory-card,.action-row{animation:gx-reveal linear both;animation-timeline:view();animation-range:entry 0% entry 35%}
+}
+@keyframes gx-reveal{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+
+/* Состояние загрузки: мерцающая подпись и пульсирующий знак */
+.loading span{background:linear-gradient(90deg,var(--muted) 30%,var(--text) 50%,var(--muted) 70%);background-size:220% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:gx-shimmer 2.2s linear infinite}
+.loading .sigil{animation:gx-breathe 2.4s ease-in-out infinite}
+@keyframes gx-shimmer{from{background-position:120% 0}to{background-position:-120% 0}}
+@keyframes gx-breathe{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
+
+/* Пружинная отдача нажатий */
+.world-tile:active,.panel:active{transform:scale(.985)}
+button{transition:transform .35s var(--spring)}
+
+/* Индикатор активного раздела (позиция задаёт Dashboard через --ind-x / --ind-w) */
+.nav-indicator{display:none}
+
+@media(max-width:700px){
+  /* Плавающая стеклянная панель вкладок */
+  .sidebar{
+    left:10px;right:10px;bottom:calc(8px + var(--safe-b));width:auto;height:64px;padding:5px 0;
+    border:1px solid var(--glass-line);border-radius:28px;
+    background:rgba(16,17,20,.62);
+    -webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6);
+    box-shadow:var(--glass-hi),0 18px 40px -12px rgba(0,0,0,.75);
+  }
+  .sidebar nav{position:relative}
+  .nav-item{position:relative;z-index:1;height:52px;border-radius:22px}
+  .nav-item.active{background:none;border-color:transparent}
+  .nav-indicator{
+    display:block;position:absolute;top:2px;bottom:2px;left:0;z-index:0;pointer-events:none;
+    width:var(--ind-w,72px);transform:translateX(var(--ind-x,0px));border-radius:22px;
+    background:linear-gradient(160deg,rgba(220,192,138,.22),rgba(220,192,138,.07));
+    box-shadow:inset 0 0 0 1px rgba(220,192,138,.3),inset 0 1px 0 rgba(255,255,255,.12);
+    transition:transform .6s var(--spring),width .6s var(--spring);
+  }
+  .main-area{padding-bottom:calc(92px + var(--safe-b))}
+  .toast{bottom:calc(86px + var(--safe-b))}
+
+  /* Модальное окно → «лист» снизу с ручкой */
+  .modal-backdrop{align-items:flex-end}
+  .modal{
+    border-radius:26px 26px 0 0;padding-top:30px;max-height:calc(100dvh - var(--safe-t) - 24px);
+    animation:gx-sheet .55s var(--spring) both;
+  }
+  .modal::before{content:'';position:absolute;top:9px;left:50%;width:38px;height:5px;margin-left:-19px;border-radius:3px;background:rgba(255,255,255,.22)}
+}
+@keyframes gx-sheet{from{transform:translateY(100%)}to{transform:none}}
+
+/* Настройки доступности уровня iOS 27: прозрачность и контраст */
+@media(prefers-reduced-transparency:reduce){
+  .sidebar,.topbar,.modal-backdrop{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .sidebar{background:#121317!important}.topbar{background:#0b0c0e!important}.modal-backdrop{background:rgba(0,0,0,.82)!important}
+  body::before{display:none}
+}
+@media(prefers-contrast:more){
+  :root{--glass-line:rgba(255,255,255,.28);--muted:#c4c3ba}
+  .panel,.world-tile,.memory-card,.metric-grid,.setting-card,.sidebar{border-color:rgba(255,255,255,.3)}
+  .side-label,.metric-foot,.world-bottom,.action-info small,.empty-state,.eyebrow,.eyebrow span{color:#cfcec5}
+}
+@media(prefers-reduced-motion:reduce){body::before{animation:none}.loading span,.loading .sigil{animation:none}}
