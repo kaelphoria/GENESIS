@@ -143,3 +143,10 @@ input,select,textarea{font-size:16px}                                  /* без
 .gx-confirm-field input{padding:12px;border:1px solid var(--glass-line);border-radius:10px;background:rgba(255,255,255,.04);color:var(--text)}
 .gx-confirm-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px}
 .gx-confirm-actions button:disabled{opacity:.4;cursor:not-allowed}
+
+/* ---------- Контраст: приглушённый текст ≥ AA (4.5:1) на фоне #07080a ---------- */
+.side-label,.connection small,.oracle-foot,.tg-gate-card>small,.user-chip small,.top-date,
+.eyebrow span,.metric strong small,.metric-foot,.world-bottom,.action-info small,.empty-state,
+.world-number span,.auth-legal{color:#9d9c93}
+.action-info.is-done b{color:#8a8981}
+.manual-compose textarea::placeholder{color:#8593a0}
