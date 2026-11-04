@@ -134,3 +134,12 @@ input,select,textarea{font-size:16px}                                  /* без
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
+
+/* ---------- Диалог подтверждения (components/ConfirmDialog.tsx) ---------- */
+.gx-confirm{max-width:440px}
+.gx-confirm h2{margin:6px 0 10px}
+.gx-confirm-text{color:var(--muted);line-height:1.6;margin:0 0 16px}
+.gx-confirm-field{display:grid;gap:8px;margin-bottom:18px;color:var(--text);font-size:13px}
+.gx-confirm-field input{padding:12px;border:1px solid var(--glass-line);border-radius:10px;background:rgba(255,255,255,.04);color:var(--text)}
+.gx-confirm-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px}
+.gx-confirm-actions button:disabled{opacity:.4;cursor:not-allowed}
