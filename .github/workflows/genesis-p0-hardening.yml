@@ -2,15 +2,26 @@
 name: GENESIS P0 hardening and verification
 
 on:
+  pull_request:
+    branches:
+      - genesis-5-recovery
+  push:
+    branches:
+      - claude/genesis-visual-redesign
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: genesis-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     name: Validate and build GENESIS server
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     defaults:
       run:
@@ -36,13 +47,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: telegram-integration/GENESIS_4.0_FINAL/source/server/package-lock.json
 
       - name: Install locked dependencies
-        run: npm ci --include=dev
+        run: npm ci --include=dev --audit=false
+
+      - name: Dependency security audit
+        id: audit
+        continue-on-error: true
+        run: npm audit --audit-level=high --json > npm-audit.json
+
+      - name: Upload dependency audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-npm-audit
+          path: telegram-integration/GENESIS_4.0_FINAL/source/server/npm-audit.json
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Validate Prisma schema
         run: npx prisma validate
@@ -58,3 +85,13 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Enforce dependency security audit
+        if: always()
+        env:
+          AUDIT_OUTCOME: ${{ steps.audit.outcome }}
+        run: |
+          if [ "$AUDIT_OUTCOME" = "failure" ]; then
+            echo "::error::High or critical dependency vulnerabilities detected. Download genesis-npm-audit artifact."
+            exit 1
+          fi

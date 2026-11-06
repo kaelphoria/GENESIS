@@ -8,58 +8,64 @@ const storage = fs.readFileSync(path.join(root, 'storage.js'), 'utf8');
 const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 
 test('local PWA keeps backward-compatible localStorage and mirrors snapshots to IndexedDB', () => {
-  assert.match(html, /localStorage\.getItem\(STORAGE_KEY\)/);
-  assert.match(html, /GenesisStorage\?\.persist\(db,db\.syncOptIn\)/);
-  assert.match(storage, /indexedDB\.open/);
-  assert.match(storage, /objectStore\(SNAPSHOTS\)\.put/);
-  assert.match(html, /GenesisStorage\.restore\(\)/);
+  assert.ok(html.includes('localStorage.getItem(STORAGE_KEY)'));
+  assert.ok(html.includes('GenesisStorage?.persist(db)'));
+  assert.ok(storage.includes('indexedDB.open'));
+  assert.ok(storage.includes('objectStore(SNAPSHOTS).put'));
+  assert.ok(html.includes('GenesisStorage.restore()'));
 });
 
-test('snapshot and opt-in outbox updates share one IndexedDB transaction', () => {
-  assert.match(storage, /transaction\(\[SNAPSHOTS, OUTBOX\], 'readwrite'\)/);
-  assert.match(storage, /if \(syncOptIn\)/);
-  assert.match(storage, /type: 'SNAPSHOT_UPSERT'/);
-  assert.match(storage, /status: 'queued'/);
-  assert.match(storage, /count > 50/);
+test('snapshots use a versioned envelope and the dead legacy outbox is retired', () => {
+  assert.ok(storage.includes('const DB_VERSION = 2'));
+  assert.ok(storage.includes('deleteObjectStore(LEGACY_OUTBOX)'));
+  assert.ok(storage.includes("put({ key: 'current', v: 1, data"));
+  assert.ok(storage.includes('record.v === 1 ? record.data'));
+  assert.ok(!storage.includes('SNAPSHOT_UPSERT'));
+  assert.ok(!storage.includes("status: 'queued'"));
+  assert.ok(!storage.includes('function clearOutbox'));
 });
 
-test('local sync opt-in is explicit and does not transmit data to a remote service', () => {
-  assert.match(html, /onchange="setSyncOptIn\(this\.checked\)"/);
-  assert.match(html, /Передача на сервер не выполняется/);
-  assert.doesNotMatch(storage, /fetch\(|XMLHttpRequest|WebSocket/);
+test('local-first PWA does not advertise an unimplemented remote sync feature', () => {
+  for (const token of ['syncOptIn','setSyncOptIn','outboxStatus']) assert.ok(!html.includes(token));
+  assert.ok(html.includes('никуда не отправляются'));
+  assert.ok(!storage.includes('fetch('));
+  assert.ok(!storage.includes('XMLHttpRequest'));
+  assert.ok(!storage.includes('WebSocket'));
 });
 
 test('backup export is versioned and import validates before replacement with a safety copy', () => {
-  assert.match(html, /format:'genesis\.private-local\.backup',schemaVersion:4/);
-  assert.match(html, /p\.schemaVersion>4/);
-  assert.match(html, /genesis-encrypted-backup-/);
-  assert.match(html, /Текущие данные будут заменены/);
-  assert.match(html, /await exportEncryptedData\(\)/);
+  assert.ok(html.includes("format:'genesis.private-local.backup',schemaVersion:4"));
+  assert.ok(html.includes('p.schemaVersion>4'));
+  assert.ok(html.includes('genesis-encrypted-backup-'));
+  assert.ok(html.includes('Текущие данные будут заменены'));
+  assert.ok(html.includes('await exportEncryptedData()'));
 });
 
 test('encrypted personal backup uses authenticated WebCrypto and a password-derived key', () => {
-  assert.match(html, /PBKDF2/);
-  assert.match(html, /iterations:310000/);
-  assert.match(html, /AES-GCM/);
-  assert.match(html, /genesis.private-local.encrypted-backup/);
+  assert.ok(html.includes('PBKDF2'));
+  assert.ok(html.includes('iterations:310000'));
+  assert.ok(html.includes('AES-GCM'));
+  assert.ok(html.includes('genesis.private-local.encrypted-backup'));
 });
 
 test('personal workspace includes goals, projects, decisions, timeline and context-controlled ORACLE', () => {
-  for (const id of ['goals','projects','decisions','timeline','oracle']) assert.match(html, new RegExp(`id=\"${id}\"`));
-  assert.match(html, /oracleUseDecisions/);
-  assert.match(html, /GENESIS UNIVERSE 4\.0/);
+  for (const id of ['goals','projects','decisions','timeline','oracle']) assert.ok(html.includes('id="' + id + '"'));
+  assert.ok(html.includes('oracleUseDecisions'));
+  assert.ok(html.includes('GENESIS UNIVERSE 4.0'));
 });
 
 test('service worker caches the IndexedDB adapter as part of the static shell', () => {
-  assert.match(worker, /'\.\/storage\.js'/);
+  assert.ok(worker.includes("'./storage.js'"));
 });
 
-test('disabling sync consent purges queued personal snapshots', () => {
-  assert.match(storage, /async function clearOutbox\(\)/);
-  assert.match(storage, /clearOutbox/);
-  assert.match(html, /if\(!db\.syncOptIn\)await window\.GenesisStorage\?\.clearOutbox\(\)/);
+test('IndexedDB quota failures surface an export action in Settings', () => {
+  assert.ok(storage.includes('STORAGE_QUOTA_EXCEEDED'));
+  assert.ok(html.includes('function showStorageWarning('));
+  assert.ok(html.includes('Открыть экспорт'));
+  assert.ok(html.includes('exportEncryptedData()'));
 });
 
 test('corrupt legacy localStorage does not block IndexedDB recovery', () => {
-  assert.match(html, /localStorage\.removeItem\(STORAGE_KEY\).*structuredClone\(defaults\)/);
+  assert.ok(html.includes('localStorage.removeItem(STORAGE_KEY)'));
+  assert.ok(html.includes('structuredClone(defaults)'));
 });

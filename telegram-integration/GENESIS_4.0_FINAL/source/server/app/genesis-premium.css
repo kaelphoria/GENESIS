@@ -1,0 +1,252 @@
+/* GENESIS PREMIUM LAYER v1 — подключается после globals.css.
+   Только переопределения: разметка и логика не затронуты.
+   Откат: убрать import './genesis-premium.css' из app/layout.tsx. */
+
+:root{
+  --bg:#07080a;
+  --panel:#0f1013;
+  --panel2:#14161a;
+  --line:rgba(255,255,255,.09);
+  --text:#ece8de;
+  --muted:#a09f96;            /* контраст на --bg ≈ 7:1 (было #898981 ≈ 5.2:1) */
+  --gold:#c1a46d;
+  --gold2:#dcc08a;
+  --glass:linear-gradient(160deg,rgba(255,255,255,.055),rgba(255,255,255,.016));
+  --glass-line:rgba(255,255,255,.085);
+  --glass-hi:inset 0 1px 0 rgba(255,255,255,.06);
+  --ease:cubic-bezier(.22,.8,.24,1);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+}
+
+html{-webkit-text-size-adjust:100%;color-scheme:dark}
+body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(ellipse 70% 40% at 78% -8%,rgba(193,164,109,.09),transparent 60%),
+    radial-gradient(ellipse 50% 35% at 0% 100%,rgba(120,140,165,.05),transparent 60%);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+
+/* ---------- Поверхности: тонкое стекло ---------- */
+.panel,.world-tile,.memory-card,.metric-grid,.setting-card,.oracle-window,.manual-side,.manual-chat{
+  background:var(--glass);
+  border:1px solid var(--glass-line);
+  border-radius:16px;
+  box-shadow:var(--glass-hi),0 18px 48px -24px rgba(0,0,0,.7);
+}
+.world-tile{transition:transform .5s var(--ease),border-color .3s,box-shadow .5s var(--ease)}
+.modal{
+  background:linear-gradient(160deg,#17181c,#0e0f12);
+  border:1px solid var(--glass-line);border-radius:20px;
+  box-shadow:var(--glass-hi),0 40px 90px -30px #000;
+  max-height:calc(100dvh - 32px);overflow:auto;overscroll-behavior:contain;
+  animation:gx-pop .38s var(--ease) both;
+}
+.modal-backdrop{background:rgba(4,5,6,.62);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.topbar{background:rgba(7,8,10,.7);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--glass-line)}
+.sidebar{background:rgba(9,10,12,.92);border-color:var(--glass-line);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+
+/* ---------- Типографика ---------- */
+.hero-row h1,.workspace h1{letter-spacing:-.02em;line-height:1.06;text-wrap:balance}
+.hero-copy,.panel p,.world-tile p,.memory-card p{color:var(--muted);line-height:1.6}
+.eyebrow{color:#b7b5aa;letter-spacing:.14em}
+
+/* ---------- Кнопки, цели касания, фокус ---------- */
+.primary-btn{
+  background:linear-gradient(115deg,var(--gold2),var(--gold));color:#14110a;border:0;
+  border-radius:12px;font-weight:650;box-shadow:0 10px 28px -12px rgba(193,164,109,.55);
+  transition:transform .25s var(--ease),filter .25s;
+}
+.primary-btn:hover{filter:brightness(1.06)}
+.icon-action,.delete-mini,.modal-close,.text-btn{min-height:40px}
+.icon-action,.modal-close{min-width:40px}
+.round-check{position:relative}
+.round-check::after{content:'';position:absolute;inset:-9px}          /* зона касания ≥ 40px */
+button:active{transform:scale(.97)}
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid var(--gold2);outline-offset:2px;border-radius:10px;
+}
+input,select,textarea{font-size:16px}                                  /* без авто-зума iOS */
+@media(min-width:701px){input,select,textarea{font-size:inherit}}
+
+/* ---------- Навигация ---------- */
+.nav-item{transition:background .3s var(--ease),color .3s,border-color .3s}
+.nav-item.active{
+  background:linear-gradient(100deg,rgba(193,164,109,.16),rgba(193,164,109,.03));
+  border-color:rgba(193,164,109,.28);color:var(--gold2);
+}
+
+/* ---------- Движение ---------- */
+@keyframes gx-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes gx-pop{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.content>*{animation:gx-rise .55s var(--ease) both}
+.content>*:nth-child(2){animation-delay:.05s}.content>*:nth-child(3){animation-delay:.1s}
+.content>*:nth-child(4){animation-delay:.15s}
+.toast{animation:gx-pop .3s var(--ease) both}
+
+/* ---------- Десктоп: hover только там, где он есть ---------- */
+@media(hover:hover) and (min-width:701px){
+  .world-tile:hover{transform:translateY(-3px);border-color:rgba(193,164,109,.4);
+    box-shadow:var(--glass-hi),0 26px 60px -26px rgba(0,0,0,.85),0 0 0 1px rgba(193,164,109,.08)}
+}
+
+/* ---------- Мобильная версия ---------- */
+@media(max-width:700px){
+  /* Все 11 разделов видны сразу, без «Другие»: горизонтальная лента с прокруткой */
+  .sidebar{
+    height:calc(66px + var(--safe-b));padding:6px 0 var(--safe-b);
+    background:rgba(8,9,11,.94);border-top:1px solid var(--glass-line);
+  }
+  .sidebar nav{
+    justify-content:flex-start;gap:2px;padding:0 10px;
+    overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 22px),transparent 100%);
+            mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 22px),transparent 100%);
+  }
+  .sidebar nav::-webkit-scrollbar{display:none}
+  .nav-item{
+    flex:0 0 auto;min-width:72px;height:52px;padding:4px 8px;gap:4px;
+    font-size:10px;letter-spacing:.03em;white-space:nowrap;scroll-snap-align:center;border-radius:12px;
+  }
+  .nav-item svg{width:19px;height:19px}
+  .main-area{padding-bottom:calc(66px + var(--safe-b))}
+  .topbar{padding-top:var(--safe-t);height:calc(49px + var(--safe-t))}
+  .toast{bottom:calc(78px + var(--safe-b))}
+
+  /* Читаемость: пол 10–11px для служебных подписей (раньше 7–9px) */
+  .eyebrow,.world-bottom,.principle-line,.context-tag,.metric span,.metric-foot,
+  .side-label,.priority,.action-info small,.memory-card small,.classification{font-size:10.5px}
+  .world-number span{font-size:10px}
+  .hero-copy{font-size:14px}
+  .world-tile p{font-size:12px}
+  .world-name{font-size:15px}
+  .panel,.world-tile,.memory-card,.metric-grid{
+    -webkit-backdrop-filter:none;backdrop-filter:none;                 /* экономим GPU на телефоне */
+  }
+  .modal-backdrop{padding:12px;align-items:flex-end}
+  .modal{width:100%;border-radius:20px 20px 16px 16px;padding-bottom:calc(23px + var(--safe-b))}
+}
+
+/* ---------- Уменьшение движения ---------- */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+
+/* ---------- Диалог подтверждения (components/ConfirmDialog.tsx) ---------- */
+.gx-confirm{max-width:440px}
+.gx-confirm h2{margin:6px 0 10px}
+.gx-confirm-text{color:var(--muted);line-height:1.6;margin:0 0 16px}
+.gx-confirm-field{display:grid;gap:8px;margin-bottom:18px;color:var(--text);font-size:13px}
+.gx-confirm-field input{padding:12px;border:1px solid var(--glass-line);border-radius:10px;background:rgba(255,255,255,.04);color:var(--text)}
+.gx-confirm-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px}
+.gx-confirm-actions button:disabled{opacity:.4;cursor:not-allowed}
+
+/* ---------- Контраст: приглушённый текст ≥ AA (4.5:1) на фоне #07080a ---------- */
+.side-label,.connection small,.oracle-foot,.tg-gate-card>small,.user-chip small,.top-date,
+.eyebrow span,.metric strong small,.metric-foot,.world-bottom,.action-info small,.empty-state,
+.world-number span,.auth-legal{color:#9d9c93}
+.action-info.is-done b{color:#8a8981}
+.manual-compose textarea::placeholder{color:#8593a0}
+
+/* =====================================================================
+   v2 — Liquid-Glass-подход (iOS 26/27) + Telegram Mini App
+   Принципы: стекло только в навигационном «хроме», контент на
+   плотных поверхностях (читаемость), пружинные переходы,
+   учёт safe-area Telegram, уважение к настройкам прозрачности/контраста.
+   ===================================================================== */
+:root{
+  --safe-t:calc(max(env(safe-area-inset-top,0px),var(--tg-safe-area-inset-top,0px)) + var(--tg-content-safe-area-inset-top,0px));
+  --safe-b:max(env(safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px));
+  --spring:cubic-bezier(.34,1.35,.5,1);
+}
+@supports (transition-timing-function:linear(0,1)){
+  :root{--spring:linear(0,.009,.035 2.1%,.141 4.4%,.723 12.9%,.938 16.7%,1.017 20.6%,1.049 23.5%,1.054 26.5%,1.034 31.4%,1.008 37.5%,.998 44%,1)}
+}
+
+/* Живой фон: медленное «северное сияние» (только transform → дёшево для GPU) */
+body::before{
+  content:'';position:fixed;inset:-25%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(40% 30% at 70% 20%,rgba(193,164,109,.16),transparent 70%),
+    radial-gradient(35% 28% at 20% 75%,rgba(110,135,170,.12),transparent 70%);
+  filter:blur(40px);opacity:.75;will-change:transform;
+  animation:gx-aurora 32s ease-in-out infinite alternate;
+}
+@keyframes gx-aurora{from{transform:translate3d(-3%,-2%,0) scale(1)}to{transform:translate3d(4%,3%,0) scale(1.12)}}
+
+/* Каскадное появление плиток и карточек */
+.world-grid>*,.memory-grid>*,.settings-grid>*,.metric-grid>*{animation:gx-rise .6s var(--ease) both;animation-delay:calc(var(--i,0)*45ms)}
+.world-grid>:nth-child(1),.memory-grid>:nth-child(1),.settings-grid>:nth-child(1),.metric-grid>:nth-child(1){--i:1}
+.world-grid>:nth-child(2),.memory-grid>:nth-child(2),.settings-grid>:nth-child(2),.metric-grid>:nth-child(2){--i:2}
+.world-grid>:nth-child(3),.memory-grid>:nth-child(3),.settings-grid>:nth-child(3),.metric-grid>:nth-child(3){--i:3}
+.world-grid>:nth-child(4),.memory-grid>:nth-child(4),.settings-grid>:nth-child(4),.metric-grid>:nth-child(4){--i:4}
+.world-grid>:nth-child(5){--i:5}.world-grid>:nth-child(6){--i:6}.world-grid>:nth-child(7){--i:7}
+.world-grid>:nth-child(8){--i:8}.world-grid>:nth-child(9){--i:9}
+
+/* Появление при прокрутке (scroll-driven animations), где поддерживается */
+@supports (animation-timeline:view()){
+  .memory-card,.action-row{animation:gx-reveal linear both;animation-timeline:view();animation-range:entry 0% entry 35%}
+}
+@keyframes gx-reveal{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+
+/* Состояние загрузки: мерцающая подпись и пульсирующий знак */
+.loading span{background:linear-gradient(90deg,var(--muted) 30%,var(--text) 50%,var(--muted) 70%);background-size:220% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:gx-shimmer 2.2s linear infinite}
+.loading .sigil{animation:gx-breathe 2.4s ease-in-out infinite}
+@keyframes gx-shimmer{from{background-position:120% 0}to{background-position:-120% 0}}
+@keyframes gx-breathe{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
+
+/* Пружинная отдача нажатий */
+.world-tile:active,.panel:active{transform:scale(.985)}
+button{transition:transform .35s var(--spring)}
+
+/* Индикатор активного раздела (позиция задаёт Dashboard через --ind-x / --ind-w) */
+.nav-indicator{display:none}
+
+@media(max-width:700px){
+  /* Плавающая стеклянная панель вкладок */
+  .sidebar{
+    left:10px;right:10px;bottom:calc(8px + var(--safe-b));width:auto;height:64px;padding:5px 0;
+    border:1px solid var(--glass-line);border-radius:28px;
+    background:rgba(16,17,20,.62);
+    -webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6);
+    box-shadow:var(--glass-hi),0 18px 40px -12px rgba(0,0,0,.75);
+  }
+  .sidebar nav{position:relative}
+  .nav-item{position:relative;z-index:1;height:52px;border-radius:22px}
+  .nav-item.active{background:none;border-color:transparent}
+  .nav-indicator{
+    display:block;position:absolute;top:2px;bottom:2px;left:0;z-index:0;pointer-events:none;
+    width:var(--ind-w,72px);transform:translateX(var(--ind-x,0px));border-radius:22px;
+    background:linear-gradient(160deg,rgba(220,192,138,.22),rgba(220,192,138,.07));
+    box-shadow:inset 0 0 0 1px rgba(220,192,138,.3),inset 0 1px 0 rgba(255,255,255,.12);
+    transition:transform .6s var(--spring),width .6s var(--spring);
+  }
+  .main-area{padding-bottom:calc(92px + var(--safe-b))}
+  .toast{bottom:calc(86px + var(--safe-b))}
+
+  /* Модальное окно → «лист» снизу с ручкой */
+  .modal-backdrop{align-items:flex-end}
+  .modal{
+    border-radius:26px 26px 0 0;padding-top:30px;max-height:calc(100dvh - var(--safe-t) - 24px);
+    animation:gx-sheet .55s var(--spring) both;
+  }
+  .modal::before{content:'';position:absolute;top:9px;left:50%;width:38px;height:5px;margin-left:-19px;border-radius:3px;background:rgba(255,255,255,.22)}
+}
+@keyframes gx-sheet{from{transform:translateY(100%)}to{transform:none}}
+
+/* Настройки доступности уровня iOS 27: прозрачность и контраст */
+@media(prefers-reduced-transparency:reduce){
+  .sidebar,.topbar,.modal-backdrop{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .sidebar{background:#121317!important}.topbar{background:#0b0c0e!important}.modal-backdrop{background:rgba(0,0,0,.82)!important}
+  body::before{display:none}
+}
+@media(prefers-contrast:more){
+  :root{--glass-line:rgba(255,255,255,.28);--muted:#c4c3ba}
+  .panel,.world-tile,.memory-card,.metric-grid,.setting-card,.sidebar{border-color:rgba(255,255,255,.3)}
+  .side-label,.metric-foot,.world-bottom,.action-info small,.empty-state,.eyebrow,.eyebrow span{color:#cfcec5}
+}
+@media(prefers-reduced-motion:reduce){body::before{animation:none}.loading span,.loading .sigil{animation:none}}
