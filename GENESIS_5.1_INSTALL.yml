@@ -1,0 +1,107 @@
+name: Apply GENESIS 5.1 production candidate
+
+on:
+  push:
+    branches:
+      - claude/genesis-visual-redesign
+    paths:
+      - .github/workflows/apply-genesis-5-1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: genesis-5-1-candidate
+  cancel-in-progress: false
+
+jobs:
+  apply-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout working branch
+        uses: actions/checkout@v4
+        with:
+          ref: claude/genesis-visual-redesign
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: telegram-integration/GENESIS_4.0_FINAL/source/server/package-lock.json
+
+      - name: Validate archive and apply approved source files
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          from zipfile import ZipFile
+
+          archive = Path("GENESIS_5.1_PRODUCTION_CANDIDATE.zip")
+          approved = [
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/components/UniverseOrbit.tsx",
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/components/Dashboard.tsx",
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/package.json",
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/package-lock.json",
+          ]
+
+          if not archive.is_file():
+              raise SystemExit("STOP: GENESIS 5.1 candidate ZIP is missing")
+
+          with ZipFile(archive) as z:
+              entries = z.infolist()
+              if not entries:
+                  raise SystemExit("STOP: candidate ZIP is empty")
+              if sum(item.file_size for item in entries) > 200_000_000:
+                  raise SystemExit("STOP: candidate ZIP exceeds 200 MB expanded")
+
+              for item in entries:
+                  path = PurePosixPath(item.filename)
+                  if path.is_absolute() or ".." in path.parts or ".git" in path.parts:
+                      raise SystemExit("STOP: unsafe archive path: " + item.filename)
+
+              names = set(z.namelist())
+              missing = [name for name in approved if name not in names]
+              if missing:
+                  raise SystemExit("STOP: missing approved files:\n" + "\n".join(missing))
+
+              for name in approved:
+                  target = Path(name)
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(z.read(name))
+
+          print("Applied exactly 4 approved GENESIS 5.1 source files.")
+          PY
+
+      - name: Install locked dependencies
+        working-directory: telegram-integration/GENESIS_4.0_FINAL/source/server
+        run: npm ci
+
+      - name: Run type checks and tests
+        working-directory: telegram-integration/GENESIS_4.0_FINAL/source/server
+        run: npm run check
+
+      - name: Build production bundle
+        working-directory: telegram-integration/GENESIS_4.0_FINAL/source/server
+        run: npm run build
+
+      - name: Commit verified source to working branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/components/UniverseOrbit.tsx \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/components/Dashboard.tsx \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/package.json \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/package-lock.json
+          if git diff --cached --quiet; then
+            echo "No source changes to commit."
+            exit 0
+          fi
+          git commit -m "Apply verified GENESIS 5.1 production candidate"
+          git push origin HEAD:refs/heads/claude/genesis-visual-redesign
