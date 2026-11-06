@@ -41,12 +41,22 @@ jobs:
           from zipfile import ZipFile
 
           archive = Path("GENESIS_5.1_PRODUCTION_CANDIDATE.zip")
+          server = Path("telegram-integration/GENESIS_4.0_FINAL/source/server")
           approved = [
               "telegram-integration/GENESIS_4.0_FINAL/source/server/components/UniverseOrbit.tsx",
-              "telegram-integration/GENESIS_4.0_FINAL/source/server/components/Dashboard.tsx",
               "telegram-integration/GENESIS_4.0_FINAL/source/server/package.json",
               "telegram-integration/GENESIS_4.0_FINAL/source/server/package-lock.json",
           ]
+
+          # Dashboard is intentionally retained from the working branch.
+          # It already contains the Universe integration and the self-contained
+          # ManualOracle. The candidate ZIP's Dashboard copy is stale and
+          # violates the current chat-idempotency UI contract.
+          dashboard = (server / "components" / "Dashboard.tsx").read_text()
+          if "<ManualOracle/>" not in dashboard:
+              raise SystemExit("STOP: working-branch Dashboard is missing ManualOracle")
+          if "UniverseOrbit" not in dashboard or "<UniverseOrbit worlds={worlds} onSelect={selectWorld}/>" not in dashboard:
+              raise SystemExit("STOP: working-branch Dashboard is missing Universe integration")
 
           if not archive.is_file():
               raise SystemExit("STOP: GENESIS 5.1 candidate ZIP is missing")
@@ -73,7 +83,7 @@ jobs:
                   target.parent.mkdir(parents=True, exist_ok=True)
                   target.write_bytes(z.read(name))
 
-          print("Applied exactly 4 approved GENESIS 5.1 source files.")
+          print("Applied exactly 3 approved files; retained verified working-branch Dashboard.")
           PY
 
       - name: Install locked dependencies
@@ -96,7 +106,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- \
             telegram-integration/GENESIS_4.0_FINAL/source/server/components/UniverseOrbit.tsx \
-            telegram-integration/GENESIS_4.0_FINAL/source/server/components/Dashboard.tsx \
             telegram-integration/GENESIS_4.0_FINAL/source/server/package.json \
             telegram-integration/GENESIS_4.0_FINAL/source/server/package-lock.json
           if git diff --cached --quiet; then
