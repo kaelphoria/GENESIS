@@ -1,4 +1,4 @@
-name: Apply GENESIS 5.1 production candidate
+name: Apply GENESIS Universe mobile fix
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: genesis-5-1-candidate
+  group: genesis-universe-mobile-fix
   cancel-in-progress: false
 
 jobs:
@@ -32,65 +32,39 @@ jobs:
           cache: npm
           cache-dependency-path: telegram-integration/GENESIS_4.0_FINAL/source/server/package-lock.json
 
-      - name: Validate archive and apply approved source files
+      - name: Validate and apply mobile CSS patch
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          from pathlib import Path, PurePosixPath
+          from pathlib import Path
           from zipfile import ZipFile
 
-          archive = Path("GENESIS_5.1_PRODUCTION_CANDIDATE.zip")
-          server = Path("telegram-integration/GENESIS_4.0_FINAL/source/server")
-          approved = [
-              "telegram-integration/GENESIS_4.0_FINAL/source/server/components/UniverseOrbit.tsx",
-              "telegram-integration/GENESIS_4.0_FINAL/source/server/package.json",
-              "telegram-integration/GENESIS_4.0_FINAL/source/server/package-lock.json",
-          ]
-
-          # Dashboard is intentionally retained from the working branch.
-          # It already contains the Universe integration and the self-contained
-          # ManualOracle. The candidate ZIP's Dashboard copy is stale and
-          # violates the current chat-idempotency UI contract.
-          dashboard = (server / "components" / "Dashboard.tsx").read_text()
-          if "<ManualOracle/>" not in dashboard:
-              raise SystemExit("STOP: working-branch Dashboard is missing ManualOracle")
-          if "UniverseOrbit" not in dashboard or "<UniverseOrbit worlds={worlds} onSelect={selectWorld}/>" not in dashboard:
-              raise SystemExit("STOP: working-branch Dashboard is missing Universe integration")
-
+          archive = Path("GENESIS_UNIVERSE_MOBILE_FIX.zip")
+          target = Path("telegram-integration/GENESIS_4.0_FINAL/source/server/app/globals.css")
+          marker = "GENESIS 5.2 — Universe orbital scene and responsive iPhone layout"
           if not archive.is_file():
-              raise SystemExit("STOP: GENESIS 5.1 candidate ZIP is missing")
-
+              raise SystemExit("STOP: GENESIS_UNIVERSE_MOBILE_FIX.zip is missing")
           with ZipFile(archive) as z:
-              entries = z.infolist()
-              if not entries:
-                  raise SystemExit("STOP: candidate ZIP is empty")
-              if sum(item.file_size for item in entries) > 200_000_000:
-                  raise SystemExit("STOP: candidate ZIP exceeds 200 MB expanded")
-
-              for item in entries:
-                  path = PurePosixPath(item.filename)
-                  if path.is_absolute() or ".." in path.parts or ".git" in path.parts:
-                      raise SystemExit("STOP: unsafe archive path: " + item.filename)
-
-              names = set(z.namelist())
-              missing = [name for name in approved if name not in names]
-              if missing:
-                  raise SystemExit("STOP: missing approved files:\n" + "\n".join(missing))
-
-              for name in approved:
-                  target = Path(name)
-                  target.parent.mkdir(parents=True, exist_ok=True)
-                  target.write_bytes(z.read(name))
-
-          print("Applied exactly 3 approved files; retained verified working-branch Dashboard.")
+              names = z.namelist()
+              if names != ["GENESIS_UNIVERSE_MOBILE_FIX.css"]:
+                  raise SystemExit("STOP: unexpected archive contents")
+              patch = z.read(names[0]).decode("utf-8")
+          current = target.read_text(encoding="utf-8")
+          if marker in current:
+              raise SystemExit("STOP: mobile CSS patch already exists; refusing duplicate append")
+          required = [".eh-universe", ".eh-three-host", ".eh-world-index", "@media(max-width:600px)"]
+          if not all(token in patch for token in required):
+              raise SystemExit("STOP: CSS patch failed required-selector validation")
+          target.write_text(current.rstrip() + "\n\n" + patch, encoding="utf-8")
+          print("Applied responsive Universe CSS patch.")
           PY
 
       - name: Install locked dependencies
         working-directory: telegram-integration/GENESIS_4.0_FINAL/source/server
         run: npm ci
 
-      - name: Run type checks and tests
+      - name: Run tests and type checks
         working-directory: telegram-integration/GENESIS_4.0_FINAL/source/server
         run: npm run check
 
@@ -98,19 +72,12 @@ jobs:
         working-directory: telegram-integration/GENESIS_4.0_FINAL/source/server
         run: npm run build
 
-      - name: Commit verified source to working branch
+      - name: Commit verified mobile fix
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- \
-            telegram-integration/GENESIS_4.0_FINAL/source/server/components/UniverseOrbit.tsx \
-            telegram-integration/GENESIS_4.0_FINAL/source/server/package.json \
-            telegram-integration/GENESIS_4.0_FINAL/source/server/package-lock.json
-          if git diff --cached --quiet; then
-            echo "No source changes to commit."
-            exit 0
-          fi
-          git commit -m "Apply verified GENESIS 5.1 production candidate"
+          git add -- telegram-integration/GENESIS_4.0_FINAL/source/server/app/globals.css
+          git commit -m "Fix GENESIS Universe mobile layout"
           git push origin HEAD:refs/heads/claude/genesis-visual-redesign
