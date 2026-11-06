@@ -1,0 +1,112 @@
+
+name: Apply GENESIS implementation archive
+
+on:
+  push:
+    branches:
+      - claude/genesis-visual-redesign
+    paths:
+      - .github/workflows/apply-genesis-implementation.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout working branch
+        uses: actions/checkout@v4
+        with:
+          ref: claude/genesis-visual-redesign
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: telegram-integration/GENESIS_4.0_FINAL/source/server/package-lock.json
+
+      - name: Extract approved implementation files
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          archive = Path("GENESIS_IMPLEMENTATION_2026-11-05.zip")
+
+          files = [
+              "telegram-integration/GENESIS_4.0_FINAL/source/iphone/index.html",
+              "telegram-integration/GENESIS_4.0_FINAL/source/iphone/storage.js",
+              "telegram-integration/GENESIS_4.0_FINAL/source/iphone/sw.js",
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/app/globals.css",
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/app/telegram/telegram-mini-app.tsx",
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/components/AuthForm.tsx",
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/components/ConfirmDialog.tsx",
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/components/Dashboard.tsx",
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/components/ManualOracle.tsx",
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/components/UniverseOrbit.tsx",
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/components/WorldTile.tsx",
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/tests/chat-idempotency-contract.test.cjs",
+              "telegram-integration/GENESIS_4.0_FINAL/source/server/tests/iphone-storage-contract.test.cjs",
+          ]
+
+          if not archive.is_file():
+              raise SystemExit("Implementation ZIP not found in repository root")
+
+          with ZipFile(archive) as z:
+              names = set(z.namelist())
+              missing = [name for name in files if name not in names]
+
+              if missing:
+                  raise SystemExit("Missing archive files:\n" + "\n".join(missing))
+
+              for name in files:
+                  target = Path(name)
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(z.read(name))
+
+          print(f"Applied {len(files)} approved files.")
+          PY
+
+      - name: Install dependencies
+        working-directory: telegram-integration/GENESIS_4.0_FINAL/source/server
+        run: npm ci
+
+      - name: TypeScript and tests
+        working-directory: telegram-integration/GENESIS_4.0_FINAL/source/server
+        run: npm run check
+
+      - name: Production build
+        working-directory: telegram-integration/GENESIS_4.0_FINAL/source/server
+        run: npm run build
+
+      - name: Commit implementation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -- \
+            telegram-integration/GENESIS_4.0_FINAL/source/iphone/index.html \
+            telegram-integration/GENESIS_4.0_FINAL/source/iphone/storage.js \
+            telegram-integration/GENESIS_4.0_FINAL/source/iphone/sw.js \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/app/globals.css \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/app/telegram/telegram-mini-app.tsx \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/components/AuthForm.tsx \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/components/ConfirmDialog.tsx \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/components/Dashboard.tsx \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/components/ManualOracle.tsx \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/components/UniverseOrbit.tsx \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/components/WorldTile.tsx \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/tests/chat-idempotency-contract.test.cjs \
+            telegram-integration/GENESIS_4.0_FINAL/source/server/tests/iphone-storage-contract.test.cjs
+
+          if git diff --cached --quiet; then
+            echo "No source changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Apply GENESIS implementation archive"
+          git push origin HEAD:refs/heads/claude/genesis-visual-redesign
