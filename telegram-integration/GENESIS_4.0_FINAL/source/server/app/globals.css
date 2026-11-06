@@ -113,3 +113,69 @@ html,body{background:#080a0d}body{background-image:radial-gradient(ellipse at 78
 .world-grid>.world-tile{animation:reveal-up .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--d,0)*70ms)}
 
 h1{text-wrap:balance;max-width:12ch}
+
+/* GENESIS 5.2 — Universe orbital scene and responsive iPhone layout */
+.eh-universe{
+  --eh-ink:#e9e6df;--eh-muted:#9ba8b5;--eh-blue:#a9c5dc;--eh-gold:#c8ad80;
+  position:relative;isolation:isolate;display:block;width:100%;height:clamp(650px,78vh,900px);
+  min-height:650px;margin:28px 0 34px;overflow:hidden;border:1px solid rgba(151,178,201,.22);
+  border-radius:18px;background:#03060b;color:var(--eh-ink);contain:layout paint;
+  box-shadow:0 24px 90px rgba(0,0,0,.34),inset 0 0 80px rgba(100,145,180,.045);
+}
+.eh-three-host{position:absolute;inset:0;z-index:0;overflow:hidden}
+.eh-three-host canvas{display:block;width:100%;height:100%;outline:0;touch-action:pan-y}
+.eh-vignette{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 48%,transparent 20%,rgba(2,5,9,.12) 58%,rgba(2,5,9,.78) 100%),linear-gradient(180deg,rgba(2,5,9,.72),transparent 23%,transparent 65%,rgba(2,5,9,.88))}
+.eh-topline,.eh-core-label,.eh-title,.eh-world-index,.eh-bottomline,.eh-skip-intro,.eh-replay,.eh-transition{position:absolute;z-index:2}
+.eh-topline{top:22px;left:26px;right:26px;display:flex;justify-content:space-between;gap:14px;color:#a99f8e;font:10px/1.5 ui-monospace,SFMono-Regular,monospace;letter-spacing:.19em;text-transform:uppercase}
+.eh-topline span:last-child{color:#c5b18c;text-align:right}
+.eh-core-label{top:76px;left:28px;display:flex;align-items:center;gap:9px;color:#e3d5bb;font:11px/1.4 ui-monospace,monospace;letter-spacing:.2em}
+.eh-core-label i,.eh-bottomline i{width:6px;height:6px;display:inline-block;border-radius:50%;background:#d5b77f;box-shadow:0 0 13px #d5b77f}
+.eh-core-label small{color:#8597a8;font-size:9px;letter-spacing:.13em}
+.eh-title{top:112px;left:28px;max-width:min(520px,62%);pointer-events:none;text-shadow:0 2px 18px #03060b}
+.eh-title>span{display:block;color:#c5b18c;font:10px/1.5 ui-monospace,monospace;letter-spacing:.23em}
+.eh-title>b{display:block;margin-top:7px;color:#d7e4ef;font:300 clamp(24px,3.2vw,42px)/1.08 'Avenir Next',Avenir,sans-serif;letter-spacing:-.035em}
+.eh-title p{max-width:390px;margin:12px 0 0;color:#c1c7ce;font-size:13px;line-height:1.65}
+.eh-world-index{left:24px;right:24px;bottom:72px;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:7px}
+.eh-world-index button{min-width:0;min-height:48px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;padding:7px 9px;border:1px solid rgba(157,183,205,.24);border-radius:8px;background:rgba(7,13,20,.76);backdrop-filter:blur(12px);color:#d9e1e8;font:9px/1.2 ui-monospace,monospace;letter-spacing:.08em;text-align:left;transition:background .2s,border-color .2s,transform .2s}
+.eh-world-index button span{color:#c3a879;font-size:8px}
+.eh-world-index button:hover,.eh-world-index button:focus-visible{outline:none;border-color:#a8c6df;background:rgba(45,67,86,.82);transform:translateY(-2px)}
+.eh-world-index button:disabled{opacity:.4}
+.eh-bottomline{left:26px;right:26px;bottom:25px;display:flex;justify-content:space-between;gap:12px;color:#8fa1b2;font:9px/1.5 ui-monospace,monospace;letter-spacing:.13em}
+.eh-bottomline span:first-child{display:flex;align-items:center;gap:8px;color:#c8b58f}
+.eh-bottomline i{width:5px;height:5px;background:#8ebc9c;box-shadow:0 0 10px #8ebc9c}
+.eh-skip-intro,.eh-replay{top:76px;right:26px;min-height:36px;padding:0 13px;border:1px solid rgba(166,192,215,.36);border-radius:30px;background:rgba(8,15,23,.72);color:#d9e5ef;font:9px ui-monospace,monospace;letter-spacing:.08em}
+.eh-replay{top:auto;right:26px;bottom:20px;width:34px;min-height:34px;padding:0;font-size:17px}
+.eh-transition{inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;background:rgba(2,5,9,.28);backdrop-filter:blur(3px);pointer-events:none}
+.eh-transition span{color:#c4ad82;font:10px ui-monospace,monospace;letter-spacing:.25em}
+.eh-transition b{font:300 clamp(26px,5vw,48px) 'Avenir Next',Avenir,sans-serif;letter-spacing:.08em}
+.eh-transition i{width:42px;height:1px;background:#c4ad82}
+@media(max-width:850px){
+ .eh-universe{height:760px;min-height:760px;margin:22px 0 28px;border-radius:14px}
+ .eh-world-index{grid-template-columns:repeat(3,minmax(0,1fr));bottom:72px;gap:7px}
+ .eh-world-index button{min-height:42px;flex-direction:row;align-items:center;gap:8px;font-size:9px}
+ .eh-title{max-width:72%}
+}
+@media(max-width:600px){
+ .eh-universe{height:760px;min-height:760px;margin:18px 0 24px;border-radius:12px}
+ .eh-topline{top:15px;left:15px;right:15px;font-size:8px;letter-spacing:.12em}
+ .eh-core-label{top:49px;left:16px;font-size:9px;letter-spacing:.12em}
+ .eh-core-label small{font-size:8px}
+ .eh-title{top:82px;left:16px;right:16px;max-width:none}
+ .eh-title>span{font-size:8px;letter-spacing:.16em}
+ .eh-title>b{font-size:27px}
+ .eh-title p{max-width:300px;margin-top:7px;font-size:11px;line-height:1.5}
+ .eh-skip-intro{top:48px;right:14px;min-height:30px;padding:0 9px;font-size:8px}
+ .eh-world-index{left:14px;right:14px;bottom:66px;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .eh-world-index button{min-height:39px;padding:6px 7px;border-radius:7px;font-size:8px;letter-spacing:.04em}
+ .eh-world-index button span{font-size:7px}
+ .eh-bottomline{left:15px;right:15px;bottom:16px;font-size:7px;letter-spacing:.07em}
+ .eh-bottomline span:last-child{max-width:48%;text-align:right}
+ .eh-replay{right:13px;bottom:12px;width:28px;min-height:28px;font-size:15px}
+}
+@media(max-width:380px){
+ .eh-universe{height:730px;min-height:730px}
+ .eh-world-index button{font-size:7px;padding:5px}
+ .eh-title>b{font-size:24px}
+ .eh-bottomline{font-size:6px}
+}
+@media(prefers-reduced-motion:reduce){.eh-world-index button{transition:none}}
