@@ -1,0 +1,83 @@
+name: Apply GENESIS Universe mobile fix
+
+on:
+  push:
+    branches:
+      - claude/genesis-visual-redesign
+    paths:
+      - .github/workflows/apply-genesis-5-1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: genesis-universe-mobile-fix
+  cancel-in-progress: false
+
+jobs:
+  apply-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout working branch
+        uses: actions/checkout@v4
+        with:
+          ref: claude/genesis-visual-redesign
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: telegram-integration/GENESIS_4.0_FINAL/source/server/package-lock.json
+
+      - name: Validate and apply mobile CSS patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          archive = Path("GENESIS_UNIVERSE_MOBILE_FIX.zip")
+          target = Path("telegram-integration/GENESIS_4.0_FINAL/source/server/app/globals.css")
+          marker = "GENESIS 5.2 — Universe orbital scene and responsive iPhone layout"
+          if not archive.is_file():
+              raise SystemExit("STOP: GENESIS_UNIVERSE_MOBILE_FIX.zip is missing")
+          with ZipFile(archive) as z:
+              names = z.namelist()
+              if names != ["GENESIS_UNIVERSE_MOBILE_FIX.css"]:
+                  raise SystemExit("STOP: unexpected archive contents")
+              patch = z.read(names[0]).decode("utf-8")
+          current = target.read_text(encoding="utf-8")
+          if marker in current:
+              raise SystemExit("STOP: mobile CSS patch already exists; refusing duplicate append")
+          required = [".eh-universe", ".eh-three-host", ".eh-world-index", "@media(max-width:600px)"]
+          if not all(token in patch for token in required):
+              raise SystemExit("STOP: CSS patch failed required-selector validation")
+          target.write_text(current.rstrip() + "\n\n" + patch, encoding="utf-8")
+          print("Applied responsive Universe CSS patch.")
+          PY
+
+      - name: Install locked dependencies
+        working-directory: telegram-integration/GENESIS_4.0_FINAL/source/server
+        run: npm ci
+
+      - name: Run tests and type checks
+        working-directory: telegram-integration/GENESIS_4.0_FINAL/source/server
+        run: npm run check
+
+      - name: Build production bundle
+        working-directory: telegram-integration/GENESIS_4.0_FINAL/source/server
+        run: npm run build
+
+      - name: Commit verified mobile fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- telegram-integration/GENESIS_4.0_FINAL/source/server/app/globals.css
+          git commit -m "Fix GENESIS Universe mobile layout"
+          git push origin HEAD:refs/heads/claude/genesis-visual-redesign

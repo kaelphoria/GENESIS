@@ -21,8 +21,9 @@ test('user message is durably saved before provider execution and not duplicated
   assert.ok(route.indexOf("role: 'user', content: prompt") < route.indexOf('await completeOracle({'));
   assert.match(route.replace(/\s+/g, ' '), /userMessageId \? \{ id: \{ not: requestRecord.userMessageId \} \}/);
 });
-test('client reuses the same request id after a failed send of the same prompt', () => {
-  assert.match(ui, /retryRequest\?\.prompt===q\?retryRequest\.id:crypto\.randomUUID\(\)/);
+test('Dashboard delegates conversation history to the self-contained manual ORACLE', () => {
+  assert.ok(ui.includes('<ManualOracle/>'));
+  for (const token of ['retryRequest','loadConversations','selectConversation','createConversation']) assert.ok(!ui.includes(token));
 });
 
 test('request and initial user message are committed atomically; retries use compare-and-set', () => {

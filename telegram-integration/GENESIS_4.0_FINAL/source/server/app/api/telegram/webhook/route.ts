@@ -104,10 +104,10 @@ export async function POST(req: NextRequest) {
       } else {
         await callTelegram('sendMessage', {
           chat_id: chatId,
-          text: 'GENESIS готов. Открой своё пространство. ORACLE работает в бесплатном режиме обмена с ChatGPT.',
+          text: 'GENESIS готов ✦\n\nТвоё приватное пространство: цели, память, решения и ORACLE — в одном месте.\n\nНажми кнопку ниже или просто отправь мысль текстом — я сохраню её в ORACLE. ORACLE работает в бесплатном режиме обмена с ChatGPT.',
           reply_markup: {
             inline_keyboard: [[
-              { text: 'Открыть GENESIS', web_app: { url: app } }
+              { text: '✦ Открыть GENESIS', web_app: { url: app } }
             ]]
           }
         });
@@ -139,6 +139,7 @@ export async function POST(req: NextRequest) {
     try {
       const ownerId = process.env.GENESIS_TELEGRAM_OWNER_USER_ID;
       if (!ownerId) throw new Error('Telegram owner is not configured');
+      await callTelegram('sendChatAction', { chat_id: chatId, action: 'typing' }).catch(() => undefined);
       await saveManualPrompt(ownerId, text);
       const app = process.env.TELEGRAM_WEBAPP_URL;
       const responseText = 'Запрос сохранён в GENESIS ORACLE. Открой Mini App → ORACLE, найди новый диалог и скопируй запрос в ChatGPT. Затем вставь ответ в поле «Ответ ChatGPT» и сохрани его в истории. Платный API не используется.';

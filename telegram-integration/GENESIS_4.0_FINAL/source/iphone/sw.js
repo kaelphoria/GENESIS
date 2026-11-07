@@ -3,7 +3,7 @@
  * cross-origin, or user-specific responses. Never delete caches owned by other apps.
  */
 const CACHE_PREFIX = 'genesis-private-local-';
-const CACHE_NAME = `${CACHE_PREFIX}v5`;
+const CACHE_NAME = CACHE_PREFIX + 'v6';
 const APP_SHELL = [
   './',
   './index.html',
@@ -27,9 +27,10 @@ function isSameOriginStaticRequest(request, url) {
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(async cache => {
+      await Promise.all(APP_SHELL.map(asset => cache.add(asset).catch(() => null)));
+      await self.skipWaiting();
+    })
   );
 });
 
@@ -48,31 +49,20 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const request = event.request;
   const url = new URL(request.url);
-
   if (!isSameOriginStaticRequest(request, url)) return;
 
-  // Navigation: prefer fresh content, fall back to the cached app shell offline.
   if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request).catch(() => caches.match('./index.html'))
-    );
+    event.respondWith(fetch(request).catch(() => caches.match('./index.html')));
     return;
   }
 
-  // Static shell assets: cache-first, but only successful public responses.
   event.respondWith(
-    caches.match(request).then(cached => {
-      if (cached) return cached;
-      return fetch(request).then(response => {
-        const cacheControl = response.headers.get('Cache-Control') || '';
-        const isPublic = !/private|no-store/i.test(cacheControl);
-        if (response.ok && response.type === 'basic' && isPublic) {
-          event.waitUntil(
-            caches.open(CACHE_NAME).then(cache => cache.put(request, response.clone()))
-          );
-        }
-        return response;
-      });
-    })
+    caches.match(request).then(cached => cached || fetch(request).then(response => {
+      if (response.ok && response.type === 'basic') {
+        const copy = response.clone();
+        void caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+      }
+      return response;
+    }))
   );
 });
