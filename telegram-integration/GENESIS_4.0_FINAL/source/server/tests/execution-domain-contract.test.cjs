@@ -8,11 +8,11 @@ const migration = fs.readFileSync(path.join(root, 'prisma/migrations/20261103000
 const exportRoute = fs.readFileSync(path.join(root, 'app/api/export/route.ts'), 'utf8');
 
 test('execution and decision domain models are owned by the user and connected by explicit relations', () => {
-  for (const model of ['Project', 'Milestone', 'Decision', 'Experiment', 'Artifact']) assert.match(schema, new RegExp(`model ${model} \\{`));
-  assert.match(schema, /model Project[\s\S]*?user User @relation/);
-  assert.match(schema, /model Milestone[\s\S]*?project Project @relation/);
-  assert.match(schema, /model Decision[\s\S]*?experiments Experiment\[\]/);
-  assert.match(schema, /model Experiment[\s\S]*?decision Decision\?/);
+  for (const model of ['Project', 'Milestone', 'Decision', 'Experiment', 'Artifact']) assert.match(schema.replace(/\s+/g, ' '), new RegExp(`model ${model} \\{`));
+  assert.match(schema.replace(/\s+/g, ' '), /model Project[\s\S]*?user User @relation/);
+  assert.match(schema.replace(/\s+/g, ' '), /model Milestone[\s\S]*?project Project @relation/);
+  assert.match(schema.replace(/\s+/g, ' '), /model Decision[\s\S]*?experiments Experiment\[\]/);
+  assert.match(schema.replace(/\s+/g, ' '), /model Experiment[\s\S]*?decision Decision\?/);
 });
 
 test('execution domain migration is additive and preserves existing action records', () => {

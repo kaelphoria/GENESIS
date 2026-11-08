@@ -1,10 +1,15 @@
 
+import { timingSafeEqual } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
 import { db } from '@/lib/db';
 import { enforceRateLimit } from '@/lib/rate-limit';
+import { requireSameOrigin } from '@/lib/request-security';
 
 export async function POST(req: NextRequest) {
+  const originFailure = requireSameOrigin(req);
+  if (originFailure) return originFailure;
+
   try {
     // Rate limiting
     const rateLimit = await enforceRateLimit(
@@ -12,7 +17,14 @@ export async function POST(req: NextRequest) {
       'auth-register',
       3,
       3600000
-    );
+    ).catch(() => null);
+
+    if (!rateLimit) {
+      return NextResponse.json(
+        { error: 'Rate-limit protection is temporarily unavailable.' },
+        { status: 503 }
+      );
+    }
 
     if (!rateLimit.allowed) {
       return NextResponse.json(
@@ -32,9 +44,9 @@ export async function POST(req: NextRequest) {
     // Bootstrap token validation
     const bootstrapToken = req.headers.get(
       'x-genesis-bootstrap-token'
-    );
+    )?.trim() ?? '';
 
-    const expectedToken = process.env.GENESIS_BOOTSTRAP_TOKEN;
+    const expectedToken = process.env.GENESIS_BOOTSTRAP_TOKEN?.trim() ?? '';
 
     if (!expectedToken || expectedToken.length < 32) {
       return NextResponse.json(
@@ -43,7 +55,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!bootstrapToken || bootstrapToken !== expectedToken) {
+    const providedBytes = new TextEncoder().encode(bootstrapToken);
+    const expectedBytes = new TextEncoder().encode(expectedToken);
+    const tokenMatches = providedBytes.byteLength === expectedBytes.byteLength &&
+      timingSafeEqual(providedBytes, expectedBytes);
+
+    if (!tokenMatches) {
       return NextResponse.json(
         {
           error: 'A valid bootstrap token is required to create a private space.'

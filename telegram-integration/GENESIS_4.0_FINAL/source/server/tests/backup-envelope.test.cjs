@@ -15,7 +15,8 @@ test('backup envelope encrypts and restores exact plaintext with authenticated e
 test('backup envelope rejects a wrong key, tampered ciphertext and changed associated data', () => {
   const envelope = encryptBackup('private', KEY);
   assert.throws(() => decryptBackup(envelope, Buffer.alloc(32, 8).toString('base64')), /BACKUP_AUTHENTICATION_FAILED/);
-  const tampered = { ...envelope, ciphertext: `${envelope.ciphertext.slice(0, -2)}AA` };
+  const replacement = envelope.ciphertext[0] === 'A' ? 'B' : 'A';
+  const tampered = { ...envelope, ciphertext: replacement + envelope.ciphertext.slice(1) };
   assert.throws(() => decryptBackup(tampered, KEY), /BACKUP_AUTHENTICATION_FAILED|BACKUP_HASH_MISMATCH/);
   assert.throws(() => decryptBackup(envelope, KEY, { associatedData: 'other-purpose' }), /BACKUP_AUTHENTICATION_FAILED/);
 });

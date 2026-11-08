@@ -1,4 +1,5 @@
 'use client';
+import { useConfirm } from '@/components/ConfirmDialog';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { CalendarDays, Plus, RefreshCw, Trash2 } from 'lucide-react';
 
@@ -17,9 +18,10 @@ export default function LifeTimeline() {
   async function create(event: FormEvent) { event.preventDefault(); try { await request('/api/life-events', 'POST', { ...form, occurredAt: new Date(`${form.occurredAt}T12:00:00`).toISOString(), projectId: form.projectId || null, decisionId: form.decisionId || null, sourceId: form.sourceId || null, goalId: form.goalId || null }); setForm({ ...initial, occurredAt: new Date().toISOString().slice(0, 10) }); await load(); setNotice('Событие добавлено в историю'); } catch (error) { setNotice((error as Error).message); } }
   async function openEditor(item: LifeEvent) { try { const data = await request(`/api/life-events?id=${encodeURIComponent(item.id)}`); const event = data.event as LifeEvent; setEditing(event); setHistory(data.event.versions || []); setEditForm({ title: event.title, description: event.description, category: event.category, occurredAt: new Date(event.occurredAt).toISOString().slice(0, 10), significance: event.significance, projectId: event.project?.id || '', goalId: event.goal?.id || '', decisionId: event.decision?.id || '', sourceId: event.source?.id || '' }); } catch (error) { setNotice((error as Error).message); } }
   async function saveEdit(event: FormEvent) { event.preventDefault(); if (!editing) return; try { await request('/api/life-events', 'PATCH', { id: editing.id, version: editing.version, ...editForm, occurredAt: new Date(`${editForm.occurredAt}T12:00:00`).toISOString(), projectId: editForm.projectId || null, decisionId: editForm.decisionId || null, sourceId: editForm.sourceId || null, goalId: editForm.goalId || null }); setEditing(null); setHistory([]); await load(); setNotice('Событие обновлено. Предыдущая версия сохранена.'); } catch (error) { setNotice((error as Error).message); } }
-  async function remove(item: LifeEvent) { if (!confirm(`Удалить событие «${item.title}»?`)) return; try { await request(`/api/life-events?id=${encodeURIComponent(item.id)}`, 'DELETE'); await load(); } catch (error) { setNotice((error as Error).message); } }
+  const [askConfirm, confirmDialog] = useConfirm();
+  async function remove(item: LifeEvent) { if (!(await askConfirm({ message: `Удалить событие «${item.title}»?`, danger: true, confirmLabel: 'Удалить' }))) return; try { await request(`/api/life-events?id=${encodeURIComponent(item.id)}`, 'DELETE'); await load(); } catch (error) { setNotice((error as Error).message); } }
   const visible = useMemo(() => filter === 'all' ? events : events.filter(item => item.category === filter), [events, filter]);
-  return <section className="workspace life-timeline">
+  return <section className="workspace life-timeline">{confirmDialog}
     <div className="eyebrow">PERSONAL CONTINUITY · LIFE TIMELINE</div>
     <h1>История жизни <em>— контекст твоего пути.</em></h1>
     <p className="hero-copy">Фиксируй важные события, переходы и достижения. Связывай их с проектами, решениями и источниками, чтобы видеть не отдельные эпизоды, а развитие во времени.</p>

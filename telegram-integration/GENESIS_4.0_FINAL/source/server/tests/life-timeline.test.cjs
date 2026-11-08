@@ -11,10 +11,10 @@ const dashboard = fs.readFileSync(path.join(root, 'components/Dashboard.tsx'), '
 const workspace = fs.readFileSync(path.join(root, 'components/LifeTimeline.tsx'), 'utf8');
 
 test('LifeEvent model is user-owned and links optional project, decision and source context', () => {
-  assert.match(schema, /model LifeEvent \{[\s\S]*?user User @relation\(fields: \[userId\], references: \[id\], onDelete: Cascade\)/);
-  assert.match(schema, /project Project\? @relation\(fields: \[projectId\], references: \[id\], onDelete: SetNull\)/);
-  assert.match(schema, /decision Decision\? @relation\(fields: \[decisionId\], references: \[id\], onDelete: SetNull\)/);
-  assert.match(schema, /source Source\? @relation\(fields: \[sourceId\], references: \[id\], onDelete: SetNull\)/);
+  assert.match(schema.replace(/\s+/g, ' '), /model LifeEvent \{[\s\S]*?user User @relation\(fields: \[userId\], references: \[id\], onDelete: Cascade\)/);
+  assert.match(schema.replace(/\s+/g, ' '), /project Project\? @relation\(fields: \[projectId\], references: \[id\], onDelete: SetNull\)/);
+  assert.match(schema.replace(/\s+/g, ' '), /decision Decision\? @relation\(fields: \[decisionId\], references: \[id\], onDelete: SetNull\)/);
+  assert.match(schema.replace(/\s+/g, ' '), /source Source\? @relation\(fields: \[sourceId\], references: \[id\], onDelete: SetNull\)/);
 });
 
 test('Life Timeline migration is additive and indexed by owner/date/category', () => {
@@ -56,7 +56,7 @@ test('Dashboard exposes the Life Timeline and links it to project, decision and 
 });
 
 test('LifeEventVersion stores immutable JSON snapshots with per-event version uniqueness', () => {
-  assert.match(schema, /model LifeEventVersion \{[\s\S]*?snapshot Json[\s\S]*?@@unique\(\[eventId, version\]\)/);
+  assert.match(schema.replace(/\s+/g, ' '), /model LifeEventVersion \{[\s\S]*?snapshot Json[\s\S]*?@@unique\(\[eventId, version\]\)/);
   const versionMigration = fs.readFileSync(path.join(root, 'prisma/migrations/202611030010_life_event_versions/migration.sql'), 'utf8');
   assert.match(versionMigration, /CREATE TABLE "LifeEventVersion"/);
   assert.match(versionMigration, /INSERT INTO "LifeEventVersion"[\s\S]*?FROM "LifeEvent"/);

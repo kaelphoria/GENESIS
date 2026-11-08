@@ -51,12 +51,12 @@ test('provider router exposes an explicit local Ollama adapter without changing 
 
 test('chat route supports explicitly selected Ollama without requiring an OpenAI key', () => {
   const chat = fs.readFileSync(path.join(__dirname, '..', 'app/api/chat/route.ts'), 'utf8');
-  assert.match(chat, /configuredProvider === 'openai' && !process\.env\.OPENAI_API_KEY/);
-  assert.match(chat, /configuredProvider === 'ollama' && !process\.env\.OLLAMA_MODEL/);
-  assert.match(chat, /include: \{ sourceRef: \{ select: \{ id: true, title: true, trustStatus: true \} \} \}/);
+  assert.match(chat.replace(/\s+/g, ' '), /configuredProvider === 'openai' && !process\.env\.OPENAI_API_KEY/);
+  assert.match(chat.replace(/\s+/g, ' '), /configuredProvider === 'ollama' && !process\.env\.OLLAMA_MODEL/);
+  assert.match(chat.replace(/\s+/g, ' '), /include: \{ sourceRef: \{ select: \{ id: true, title: true, trustStatus: true \} \} \}/);
 });
 
 test('chat route defaults personal context to off and requires an explicit true value', () => {
   const chat = fs.readFileSync(path.join(__dirname, '..', 'app/api/chat/route.ts'), 'utf8');
-  assert.match(chat, /const includeContext = body\.includeContext === true/);
+  assert.match(chat.replace(/\s+/g, ' '), /const includeContext = body\.includeContext === true/);
 });

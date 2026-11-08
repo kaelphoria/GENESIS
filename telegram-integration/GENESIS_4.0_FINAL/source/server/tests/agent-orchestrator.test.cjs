@@ -45,10 +45,10 @@ test('trace records agent ids, call count and bounded budget without prompts', (
   assert.equal('prompt' in trace, false);
 });
 test('ORACLE route executes planned stages sequentially and persists the trace', () => {
-  assert.match(route, /for \(let index = completedSteps\.length; index < agentPlan\.steps\.length; index\+\+\)/);
-  assert.match(route, /data: \{ agentTrace: progressTrace \}/);
-  assert.match(route, /agentTrace, errorCode: null/);
-  assert.match(schema, /agentTrace Json\?/);
+  assert.match(route.replace(/\s+/g, ' '), /for\s*\(\s*let index = completedSteps\.length; index < agentPlan\.steps\.length; index\+\+\s*\)/);
+  assert.match(route.replace(/\s+/g, ' '), /data: \{ agentTrace: progressTrace \}/);
+  assert.match(route.replace(/\s+/g, ' '), /agentTrace, errorCode: null/);
+  assert.match(schema.replace(/\s+/g, ' '), /agentTrace Json\?/);
 });
 
 test('failed multi-stage runs resume from the last durably completed specialist', () => {

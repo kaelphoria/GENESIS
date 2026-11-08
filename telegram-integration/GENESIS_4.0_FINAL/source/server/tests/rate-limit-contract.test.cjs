@@ -67,10 +67,10 @@ test('memory interface exposes an explicit per-record grant and revoke control',
   assert.match(source, /contextPermission:m\.contextPermission==='granted'\?'denied':'granted'/);
 });
 
-test('chat returns the exact context manifest and UI exposes a Context Inspector', () => {
+test('chat API returns its context manifest and manual ORACLE explains its no-auto-context boundary', () => {
   const route = fs.readFileSync(path.join(root, 'app/api/chat/route.ts'), 'utf8');
-  const ui = fs.readFileSync(path.join(root, 'components/Dashboard.tsx'), 'utf8');
+  const ui = fs.readFileSync(path.join(root, 'components/ManualOracle.tsx'), 'utf8');
   assert.match(route, /contextManifest: contextResult\.manifest/);
   assert.match(ui, /CONTEXT INSPECTOR/);
-  assert.match(ui, /contextReport\.entries/);
+  assert.match(ui, /не отправляет в ChatGPT твой профиль/);
 });

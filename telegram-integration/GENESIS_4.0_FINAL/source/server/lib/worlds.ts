@@ -9,3 +9,24 @@ export const WORLD_SEED = [
  {slug:'abundance',title:'ABUNDANCE',description:'Money, capital, resources and independence',subtitle:'Building material freedom',index:'08'},
  {slug:'spirit',title:'SPIRIT',description:'Meaning, worldview, faith and reflection',subtitle:'What gives direction and depth',index:'09'}
 ] as const;
+
+export type WorldSlug = typeof WORLD_SEED[number]['slug'];
+
+/**
+ * EVENT HORIZON: explicit map from the nine conceptual planets to real GENESIS domains.
+ * `domains[0]` is the primary domain opened by onSelect; the rest are related domains.
+ * Never match planets to worlds by array index.
+ */
+export const EVENT_HORIZON_WORLDS = [
+ {key:'ABUNDANCE', domains:['abundance']},
+ {key:'KNOWLEDGE', domains:['intellect']},
+ {key:'CONNECTION', domains:['connection']},
+ {key:'PHYSICAL', domains:['physical']},
+ {key:'POWER', domains:['identity']},
+ {key:'CREATIVITY', domains:['creation','aesthetics']},
+ {key:'HARMONY', domains:['psyche']},
+ {key:'LOVE', domains:['connection']},
+ {key:'FREEDOM', domains:['spirit']}
+] as const satisfies readonly {key:string; domains:readonly [WorldSlug, ...WorldSlug[]]}[];
+
+export type EventHorizonKey = typeof EVENT_HORIZON_WORLDS[number]['key'];

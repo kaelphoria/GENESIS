@@ -25,10 +25,10 @@ test('preview receipt fails closed without a strong signing secret or with tampe
 });
 
 test('import preview receipt binds the exact raw payload hash and does not mutate records', () => {
-  assert.match(route, /createHash\('sha256'\)\.update\(raw\)/);
-  assert.match(route, /createImportPreviewReceipt/);
-  assert.match(route, /receiptExpiresInSeconds/);
-  assert.match(route, /db\.importPreviewReceipt\.create/);
+  assert.match(route.replace(/\s+/g, ' '), /createHash\('sha256'\)\s*\.update\(raw\)/);
+  assert.match(route.replace(/\s+/g, ' '), /createImportPreviewReceipt/);
+  assert.match(route.replace(/\s+/g, ' '), /receiptExpiresInSeconds/);
+  assert.match(route.replace(/\s+/g, ' '), /db\.importPreviewReceipt\.create/);
   assert.doesNotMatch(route, /db\.(world|goal|action|memoryRecord|conversation|chatMessage|project|decision|lifeEvent)\.(create|update|delete)/);
 });
 
@@ -56,8 +56,8 @@ test('receipt consumption is atomic, one-time and bound to the persisted nonce',
 });
 
 test('preview endpoint uses a streaming byte limit and persists receipt nonce', () => {
-  assert.match(route, /readLimitedText\(req, MAX_IMPORT_BYTES\)/);
-  assert.match(route, /req\.body\.getReader\(\)/);
-  assert.match(route, /db\.importPreviewReceipt\.create/);
-  assert.match(route, /IMPORT_PREVIEW_CREATED/);
+  assert.match(route.replace(/\s+/g, ' '), /readLimitedText\(\s*req,\s*MAX_IMPORT_BYTES\s*\)/);
+  assert.match(route.replace(/\s+/g, ' '), /req\.body\.getReader\(\)/);
+  assert.match(route.replace(/\s+/g, ' '), /db\.importPreviewReceipt\.create/);
+  assert.match(route.replace(/\s+/g, ' '), /IMPORT_PREVIEW_CREATED/);
 });

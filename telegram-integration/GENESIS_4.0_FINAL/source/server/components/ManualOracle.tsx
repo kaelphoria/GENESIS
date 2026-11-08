@@ -1,0 +1,44 @@
+"use client";
+import {useCallback,useEffect,useMemo,useState,type FormEvent} from "react";
+import {ArrowUpRight,Check,Copy,MessageSquare,RefreshCw,Search,Send,Sparkles} from "lucide-react";
+type Conversation={id:string;title:string;updatedAt:string;_count?:{messages:number}};
+type Message={id:string;role:string;content:string;createdAt:string};
+function pluralRu(n:number,one:string,few:string,many:string){
+  const m10=n%10,m100=n%100;
+  if(m10===1&&m100!==11)return one;
+  if(m10>=2&&m10<=4&&(m100<12||m100>14))return few;
+  return many;
+}
+function relTime(iso:string){
+  const timestamp=new Date(iso).getTime();
+  if(!Number.isFinite(timestamp))return 'дата неизвестна';
+  const m=Math.max(0,Math.floor((Date.now()-timestamp)/60000));
+  if(m<1)return 'только что';
+  if(m<60)return String(m)+' мин назад';
+  const h=Math.floor(m/60);
+  if(h<24)return String(h)+' '+pluralRu(h,'час','часа','часов')+' назад';
+  const d=Math.floor(h/24);
+  return String(d)+' '+pluralRu(d,'день','дня','дней')+' назад';
+}
+
+async function api(url:string,method="GET",body?:unknown){const r=await fetch(url,{method,headers:{"Content-Type":"application/json"},...(body?{body:JSON.stringify(body)}:{}),cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Ошибка запроса");return d}
+export default function ManualOracle(){
+ const [list,setList]=useState<Conversation[]>([]),[id,setId]=useState(""),[messages,setMessages]=useState<Message[]>([]),[prompt,setPrompt]=useState(""),[reply,setReply]=useState(""),[filter,setFilter]=useState(""),[busy,setBusy]=useState(false),[notice,setNotice]=useState("");
+ const active=list.find(x=>x.id===id),visible=useMemo(()=>list.filter(x=>x.title.toLowerCase().includes(filter.toLowerCase())),[list,filter]);
+ const refresh=useCallback(async()=>{const d=await api("/api/conversations");setList(d.conversations||[]);return d.conversations||[]},[]);
+ const open=useCallback(async(cid:string)=>{setBusy(true);try{const d=await api(`/api/conversations?id=${encodeURIComponent(cid)}`);setId(cid);setMessages(d.conversation.messages||[]);setReply("");setNotice("")}catch(e){setNotice((e as Error).message)}finally{setBusy(false)}},[]);
+ useEffect(()=>{let alive=true;api("/api/conversations").then(async d=>{if(!alive)return;const rows=d.conversations||[];setList(rows);if(rows[0])await open(rows[0].id)}).catch(e=>alive&&setNotice((e as Error).message));return()=>{alive=false}},[open]);
+ async function create(){setBusy(true);try{const d=await api("/api/conversations","POST",{title:"Новый диалог"});await refresh();setId(d.conversation.id);setMessages([]);setPrompt("");setReply("");setNotice("")}catch(e){setNotice((e as Error).message)}finally{setBusy(false)}}
+ async function save(role:"user"|"assistant",content:string){if(!id||!content.trim())return;setBusy(true);try{const d=await api("/api/manual-chat","POST",{conversationId:id,role,content:content.trim()});setMessages(m=>[...m,d.message]);if(role==="user")setPrompt("");else setReply("");await refresh();setNotice(role==="user"?"Запрос сохранён. Теперь скопируй его в ChatGPT.":"Ответ сохранён в этом диалоге.")}catch(e){setNotice((e as Error).message)}finally{setBusy(false)}}
+ async function copy(text:string){try{await navigator.clipboard.writeText(text);setNotice("Скопировано в буфер обмена")}catch{setNotice("Не удалось скопировать автоматически")}}
+ const lastPrompt=[...messages].reverse().find(x=>x.role==="user")?.content||prompt;
+ return <section className="workspace manual-oracle"><div className="manual-head"><div><div className="eyebrow">GENESIS CORE / MANUAL INTELLIGENCE BRIDGE</div><h1>ORACLE <em>— твой интеллектуальный центр.</em></h1><p className="hero-copy">Бесплатный сценарий: GENESIS хранит историю, ChatGPT обрабатывает запрос отдельно.</p></div><span className="manual-status">● FREE WORKFLOW</span></div>
+ <details className="manual-context-inspector"><summary><Sparkles size={14}/> CONTEXT INSPECTOR</summary><div><b>Автоматическая передача личного контекста отключена</b><p>GENESIS не отправляет в ChatGPT твой профиль, миры, цели, память или решения. Передаётся только тот текст, который ты сам копируешь и отправляешь. История диалога сохраняется в твоём пространстве GENESIS.</p></div></details><div className="manual-layout"><aside className="manual-side"><button className="manual-new" onClick={create} disabled={busy}><MessageSquare size={16}/> Новый диалог <b>＋</b></button><label className="manual-search"><Search size={14}/><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Найти диалог"/></label><div className="manual-label">ИСТОРИЯ <span>{list.length}</span></div>{visible.map(x=><button key={x.id} className={`manual-history ${id===x.id?"active":""}`} onClick={()=>open(x.id)}><MessageSquare size={14}/><span><b>{x.title}</b><small>{x._count?.messages||0} {pluralRu(x._count?.messages||0,'сообщение','сообщения','сообщений')} · {relTime(x.updatedAt)}</small></span></button>)}<p className="manual-side-note"><Sparkles size={14}/> Никаких платных AI-запросов. Ты переносишь сообщения вручную.</p></aside>
+ <div className="manual-chat"><header><div className="manual-orb"><Sparkles size={18}/></div><div><b>{active?.title||"Новый диалог"}</b><small>ЛИЧНОЕ ПРОСТРАНСТВО · ИСТОРИЯ СОХРАНЯЕТСЯ</small></div><button className="manual-refresh" onClick={()=>id&&open(id)}><RefreshCw size={14}/></button></header>
+ <div className="manual-feed">{!messages.length&&<div className="manual-welcome"><div className="manual-orb big"><Sparkles size={26}/></div><div className="eyebrow">A NEW LINE OF THOUGHT</div><h2>С чего начнём?</h2><p>Сформулируй запрос. GENESIS сохранит его, поможет скопировать в ChatGPT, а затем примет ответ обратно в этот диалог.</p><div className="manual-suggestions">{["Помоги расставить приоритеты","Разбери идею и найди слабые места","Помоги принять сложное решение"].map(x=><button key={x} onClick={()=>setPrompt(x)}>{x}<ArrowUpRight size={13}/></button>)}</div></div>}
+ {messages.map(m=><article key={m.id} className={`manual-message ${m.role==="assistant"?"assistant":""}`}><div><b>{m.role==="assistant"?"CHATGPT RESPONSE":"YOUR PROMPT"}</b><small>{new Date(m.createdAt).toLocaleString("ru-RU")}</small></div><p>{m.content}</p><button onClick={()=>copy(m.content)}><Copy size={12}/> Копировать</button></article>)}</div>
+ {notice&&<div className="manual-notice" role="status">{notice}</div>}
+ <div className="manual-compose"><form onSubmit={(e:FormEvent)=>{e.preventDefault();void save("user",prompt)}}><label>1. ТВОЙ ЗАПРОС</label><textarea rows={3} value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="Напиши запрос для ChatGPT…"/><div className="manual-actions"><small>Сохрани запрос, затем скопируй его</small><button disabled={busy||!prompt.trim()}><Send size={14}/> Сохранить запрос</button></div></form>
+ <div className="manual-bridge"><button onClick={()=>copy(lastPrompt)} disabled={!lastPrompt}><Copy size={14}/> Скопировать последний запрос</button><a href="https://chatgpt.com/" target="_blank" rel="noreferrer">Открыть ChatGPT <ArrowUpRight size={14}/></a></div>
+ <form onSubmit={(e:FormEvent)=>{e.preventDefault();void save("assistant",reply)}}><label>2. ОТВЕТ CHATGPT</label><textarea rows={3} value={reply} onChange={e=>setReply(e.target.value)} placeholder="Вставь сюда ответ из ChatGPT…"/><div className="manual-actions"><small>Ответ добавится в этот диалог</small><button disabled={busy||!reply.trim()}><Check size={14}/> Сохранить ответ</button></div></form></div></div></div>{busy&&<div className="manual-busy">СИНХРОНИЗАЦИЯ…</div>}</section>
+}

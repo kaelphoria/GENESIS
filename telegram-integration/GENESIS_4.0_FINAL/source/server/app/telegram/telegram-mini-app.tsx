@@ -1,8 +1,159 @@
- 'use client';
-import {useEffect,useState} from 'react';
-declare global{interface Window{Telegram?:{WebApp?:{initData:string;ready:()=>void;expand:()=>void;setHeaderColor?:(c:string)=>void;setBackgroundColor?:(c:string)=>void}}}}
-export default function TelegramMiniApp(){const [status,setStatus]=useState('Проверяем защищённое соединение…');const [failed,setFailed]=useState(false);
- useEffect(()=>{let cancelled=false;const run=async()=>{const tg=window.Telegram?.WebApp;if(!tg?.initData){setFailed(true);setStatus('Открой приложение из Telegram через кнопку бота.');return;}tg.ready();tg.expand();tg.setHeaderColor?.('#090b10');tg.setBackgroundColor?.('#090b10');try{const r=await fetch('/api/telegram/auth',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({initData:tg.initData}),credentials:'same-origin',cache:'no-store'});const data=await r.json();if(!r.ok)throw new Error(data.error||'Вход не выполнен.');if(!cancelled){setStatus('Доступ подтверждён. Открываем GENESIS…');window.location.replace('/');}}catch(e){if(!cancelled){setFailed(true);setStatus(e instanceof Error?e.message:'Не удалось войти через Telegram.');}}};
- const old=document.querySelector('script[data-telegram-webapp]');if(old){void run();return()=>{cancelled=true;};}const s=document.createElement('script');s.src='https://telegram.org/js/telegram-web-app.js';s.async=true;s.dataset.telegramWebapp='true';s.onload=()=>void run();s.onerror=()=>{setFailed(true);setStatus('Не удалось загрузить Telegram Web App SDK.');};document.head.appendChild(s);return()=>{cancelled=true;};},[]);
- return <main style={{minHeight:'100svh',background:'#090b10',color:'#f2f3f5',display:'grid',placeItems:'center',padding:28,fontFamily:'Inter,system-ui,sans-serif'}}><section style={{width:'100%',maxWidth:420,textAlign:'center'}}><div style={{fontSize:11,letterSpacing:'.42em',color:'#9ba5b4',marginBottom:22}}>PRIVATE INTELLIGENCE SYSTEM</div><div style={{fontSize:42,fontWeight:300,letterSpacing:'.16em'}}>GENESIS</div><div style={{height:1,background:'linear-gradient(90deg,transparent,#8794a7,transparent)',margin:'26px 0'}}/><div aria-live="polite" style={{color:failed?'#e6a0a0':'#b7c0cc',fontSize:14,lineHeight:1.7}}>{status}</div>{!failed&&<div style={{margin:'28px auto 0',width:22,height:22,border:'1px solid #596575',borderTopColor:'#e9edf3',borderRadius:'50%',animation:'genesis-spin 1s linear infinite'}}/>}<style>{'@keyframes genesis-spin{to{transform:rotate(360deg)}}'}</style></section></main>;
+'use client';
+import { useEffect, useState } from 'react';
+
+const AUTH_TIMEOUT_MS = 15000;
+const SLOW_HINT_MS = 4000;
+const SDK_TIMEOUT_MS = 15000;
+const REDIRECT_GUARD_KEY = 'genesis-tg-auth-redirected-at';
+type AuthResult = { ok: true } | { ok: false; message: string };
+let authPromise: Promise<AuthResult> | null = null;
+
+function authenticate(initData: string): Promise<AuthResult> {
+  if (authPromise) return authPromise;
+  authPromise = (async () => {
+    const controller = new AbortController();
+    let timedOut = false;
+    const timer = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, AUTH_TIMEOUT_MS);
+    try {
+      const response = await fetch('/api/telegram/auth', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ initData }),
+        credentials: 'same-origin',
+        cache: 'no-store',
+        signal: controller.signal
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Не удалось подтвердить доступ.');
+      return { ok: true } as const;
+    } catch (error) {
+      return {
+        ok: false,
+        message: timedOut
+          ? 'Сервер не ответил за 15 секунд. Проверь соединение и повтори вход.'
+          : error instanceof Error ? error.message : 'Ошибка безопасного входа.'
+      } as const;
+    } finally {
+      window.clearTimeout(timer);
+    }
+  })();
+  void authPromise.then(result => { if (!result.ok) authPromise = null; });
+  return authPromise;
+}
+
+export default function TelegramMiniApp() {
+  const [failed, setFailed] = useState(false);
+  const [status, setStatus] = useState('Проверяем защищённое соединение');
+
+  useEffect(() => {
+    let cancelled = false;
+    let slowTimer = 0;
+    let sdkPoll = 0;
+    let elapsed = 0;
+
+    const fail = (message: string) => {
+      if (cancelled) return;
+      setFailed(true);
+      setStatus(message);
+    };
+
+    const startAuthentication = async () => {
+      if (cancelled) return;
+      const tg = window.Telegram?.WebApp;
+      if (!tg) return;
+      tg.ready?.();
+      tg.expand?.();
+      tg.setHeaderColor?.('#090a0c');
+      tg.setBackgroundColor?.('#090a0c');
+      tg.HapticFeedback?.impactOccurred?.('light');
+
+      if (!tg.initData) {
+        fail('Открой GENESIS через приватного Telegram-бота.');
+        return;
+      }
+
+      let lastRedirect = 0;
+      try { lastRedirect = Number(sessionStorage.getItem(REDIRECT_GUARD_KEY) || 0); } catch {}
+      if (lastRedirect && Date.now() - lastRedirect < 5000) {
+        fail('Похоже, вход вернулся на экран проверки. Нажми «Повторить», чтобы начать новую сессию.');
+        return;
+      }
+
+      slowTimer = window.setTimeout(() => {
+        if (!cancelled) setStatus('Соединение медленное. Продолжаем защищённую проверку…');
+      }, SLOW_HINT_MS);
+
+      const result = await authenticate(tg.initData);
+      window.clearTimeout(slowTimer);
+      if (cancelled) return;
+      if (!result.ok) {
+        fail(result.message);
+        return;
+      }
+
+      setStatus('Доступ подтверждён. Загружаем твоё пространство');
+      try { sessionStorage.setItem(REDIRECT_GUARD_KEY, String(Date.now())); } catch {}
+      window.location.replace('/');
+    };
+
+    const pollForSdk = () => {
+      if (cancelled) return;
+      if (window.Telegram?.WebApp) {
+        window.clearInterval(sdkPoll);
+        void startAuthentication();
+        return;
+      }
+      elapsed += 150;
+      if (elapsed >= SDK_TIMEOUT_MS) {
+        window.clearInterval(sdkPoll);
+        fail('Не удалось подключить модуль Telegram. Проверь сеть и открой GENESIS из бота.');
+      }
+    };
+
+    if (window.Telegram?.WebApp) {
+      void startAuthentication();
+    } else {
+      const existing = document.querySelector<HTMLScriptElement>('script[data-telegram-webapp]');
+      if (!existing) {
+        const script = document.createElement('script');
+        script.src = 'https://telegram.org/js/telegram-web-app.js';
+        script.async = true;
+        script.dataset.telegramWebapp = 'true';
+        script.onerror = () => fail('Не удалось загрузить защищённый модуль Telegram.');
+        document.head.appendChild(script);
+      } else {
+        existing.addEventListener('error', () => fail('Не удалось загрузить защищённый модуль Telegram.'), { once: true });
+      }
+      sdkPoll = window.setInterval(pollForSdk, 150);
+      pollForSdk();
+    }
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(sdkPoll);
+      window.clearTimeout(slowTimer);
+    };
+  }, []);
+
+  return (
+    <main className="tg-gate">
+      <div className="tg-gate-glow" />
+      <section className="tg-gate-card">
+        <div className="tg-gate-orbit"><span /><i /><b /></div>
+        <div className="tg-gate-kicker">PRIVATE INTELLIGENCE SYSTEM</div>
+        <div className="tg-gate-wordmark">GENESIS</div>
+        <div className="tg-gate-rule" />
+        <div className={'tg-gate-indicator' + (failed ? ' error' : '')} />
+        <p aria-live="polite">{status}</p>
+        {failed && <button className="tg-gate-retry" onClick={() => {
+          try { sessionStorage.removeItem(REDIRECT_GUARD_KEY); } catch {}
+          window.location.reload();
+        }}>Повторить подключение</button>}
+        <small>SECURE TELEGRAM SESSION · PRIVATE ACCESS</small>
+      </section>
+    </main>
+  );
 }
