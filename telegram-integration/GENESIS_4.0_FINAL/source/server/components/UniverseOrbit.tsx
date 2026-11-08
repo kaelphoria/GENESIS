@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { EVENT_HORIZON_WORLDS } from '@/lib/worlds';
 
 type World = {
   id: string;
@@ -40,6 +41,16 @@ const SPECS: WorldSpec[] = [
   { name: 'LOVE', subtitle: 'Intimacy & care', light: '#ffd0e3', mid: '#b66b91', dark: '#411e39', radius: 21.8, speed: -.036, kind: 'gas', size: .94, phase: 6.7 },
   { name: 'FREEDOM', subtitle: 'Choice & exploration', light: '#d0e7ff', mid: '#638caf', dark: '#1b304b', radius: 24, speed: .031, kind: 'ice', size: 1.08, phase: 7.4 },
 ];
+
+function resolveWorld<W extends World>(worlds: W[], name: string): W | undefined {
+  const entry = EVENT_HORIZON_WORLDS.find((item) => item.key === name);
+  if (!entry) return undefined;
+  for (const slug of entry.domains) {
+    const found = worlds.find((world) => world.slug === slug);
+    if (found) return found;
+  }
+  return undefined;
+}
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 const ease = (value: number) => value < .5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
@@ -284,7 +295,7 @@ export default function UniverseOrbit<W extends World>({ worlds, onSelect }: Pro
       if (index < 0 || index >= planets.length || selectedIndex >= 0) return;
       selectedIndex = index;
       selectedAt = performance.now();
-      const world = worldsRef.current[index];
+      const world = resolveWorld(worldsRef.current, SPECS[index].name);
       setActive(world?.id ?? `world-${index}`);
       setActiveLabel(world?.title ?? SPECS[index].name);
     };
@@ -379,7 +390,7 @@ export default function UniverseOrbit<W extends World>({ worlds, onSelect }: Pro
         camera.position.lerp(target.clone().add(direction.multiplyScalar(4.2)).add(new THREE.Vector3(0, .8, 0)), .035);
         camera.lookAt(target);
         if (now - selectedAt > 1550) {
-          const world = worldsRef.current[selectedIndex];
+          const world = resolveWorld(worldsRef.current, SPECS[selectedIndex].name);
           selectedIndex = -1;
           if (world) onSelectRef.current(world);
         }
@@ -420,14 +431,14 @@ export default function UniverseOrbit<W extends World>({ worlds, onSelect }: Pro
       <div className="entity-caption"><span className="entity-pulse" /> <b>ENTITY</b><small>THE INTELLIGENCE AT THE CENTER</small></div>
       <div className="universe-heading"><span className="universe-kicker">A WORLD OF YOUR OWN</span><h2>THE LIVING<br /><em>UNIVERSE</em></h2><p>Девять измерений одной жизни. Исследуй свою систему.</p></div>
       <div className="universe-worlds" aria-label="Выбрать мир">
-        {worlds.slice(0, 9).map((world, index) => (
-          <button key={world.id} className={`universe-world world-${index + 1}`} onClick={() => api.current?.select(index)} disabled={!!active}>
+        {SPECS.map((spec, index) => { const world = resolveWorld(worlds, spec.name); return (
+          <button key={spec.name} className={`universe-world world-${index + 1}`} onClick={() => api.current?.select(index)} disabled={!!active || !world}>
             <span className="world-number">{String(index + 1).padStart(2, '0')}</span>
-            <span className="world-name">{SPECS[index]?.name ?? world.title.toUpperCase()}</span>
-            <span className="world-subtitle">{SPECS[index]?.subtitle ?? world.description}</span>
+            <span className="world-name">{spec.name}</span>
+            <span className="world-subtitle">{spec.subtitle}</span>
             <span className="world-enter">EXPLORE ↗</span>
           </button>
-        ))}
+        ); })}
       </div>
       <div className="universe-footer"><span><i /> ORBITAL NETWORK ACTIVE</span><span>DRAG TO ROTATE <b>·</b> SELECT A WORLD</span></div>
       {active && <div className="universe-transition"><small>ESTABLISHING CONNECTION</small><strong>{activeLabel}</strong><span /></div>}
